@@ -1,16 +1,20 @@
-{{define "title"}}Snippet #{{.Snippet.ID}}{{end}}
+{{define "title"}}Project #{{.Project.ID}}{{end}}
 
 {{define "main"}}
-    {{with .Snippet}}
-    <div class='snippet'>
+    {{with .Project}}
+    <div class='project'>
         <div class='metadata'>
             <strong>{{.Title}}</strong>
             <span>#{{.ID}}</span>
         </div>
-        <pre><code>{{.Content}}</code></pre>
+        {{range .CFiles}}
+            <div class='cfiles'>
+            <strong>{{.Filename}}</strong>
+            <span>#{{.ID}}</span>
+            </div>
+        {{end}}
         <div class='metadata'>
             <time>Created: {{humanDate .Created}}</time>
-            <time>Expires: {{humanDate .Expires}}</time>
         </div>
     </div>
     {{end}}

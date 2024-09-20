@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"flag"
+	"fmt"
 	"html/template"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -16,11 +18,14 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 type application struct {
 	logger         *slog.Logger
 	snippets       models.SnippetModelInterface
+	projects       models.ProjectModelInterface
+	cfiles         models.CFileModelInterface
 	users          models.UserModelInterface
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
@@ -28,8 +33,17 @@ type application struct {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	dbPasswd := os.Getenv("DB_PASSWD")
+	dbName := os.Getenv("DB_NAME")
+
+	dsn := flag.String("dsn", fmt.Sprintf("%s:%s@/%s?parseTime=true", dbUser, dbPasswd, dbName), "MySQL data source name")
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	dsn := flag.String("dsn", "scvis:1h0ck3y$@/snippetbox?parseTime=true", "MySQL data source name")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -57,6 +71,8 @@ func main() {
 	app := &application{
 		logger:         logger,
 		snippets:       &models.SnippetModel{DB: db},
+		projects:       &models.ProjectModel{DB: db},
+		cfiles:         &models.CFileModel{DB: db},
 		users:          &models.UserModel{DB: db},
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,

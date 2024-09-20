@@ -11,26 +11,26 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	snippets, err := app.snippets.Latest()
+	projects, err := app.projects.Latest()
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
 	data := app.newTemplateData(r)
-	data.Snippets = snippets
+	data.Projects = projects
 
 	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
-func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
+func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
 
-	snippet, err := app.snippets.Get(id)
+	project, err := app.projects.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)
@@ -41,7 +41,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := app.newTemplateData(r)
-	data.Snippet = snippet
+	data.Project = project
 
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
