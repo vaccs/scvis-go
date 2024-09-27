@@ -1,0 +1,10 @@
+{{define "title"}}View C File{{end}}
+
+{{define "main"}}
+    {{if .IsAuthenticated}}
+        <h2>{{.CFile.Name}}</h2>
+        <pre>{{.CFile.Source}}</pre>
+    {{else}}
+        <p>Please <a href="/user/login">log in</a> to view a C file from a project.</p>
+    {{end}}
+{{end}}

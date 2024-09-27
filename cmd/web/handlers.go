@@ -11,7 +11,8 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	projects, err := app.projects.Latest()
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	projects, err := app.projects.GetByUserId(userID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -46,25 +47,94 @@ func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
-type snippetCreateForm struct {
+func (app *application) projectViewPost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var form projectCreateForm
+	err = app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
+	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "view.tmpl", data)
+		return
+	}
+
+	err = app.projects.UpdateTitle(id, form.Title)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// Remove selected C files
+	for _, cfileID := range form.CFileIDs {
+		err = app.cfiles.Delete(cfileID)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	// Add new C files
+	files := r.MultipartForm.File["cfiles"]
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+		defer file.Close()
+
+		content := make([]byte, fileHeader.Size)
+		_, err = file.Read(content)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		_, err = app.cfiles.Insert(id, fileHeader.Filename, string(content))
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Project successfully updated!")
+
+	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", id), http.StatusSeeOther)
+}
+
+type projectCreateForm struct {
 	Title               string `form:"title"`
-	Content             string `form:"content"`
-	Expires             int    `form:"expires"`
+	CFileIDs            []int  `form:"cfile_ids"`
 	validator.Validator `form:"-"`
 }
 
-func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) projectCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
-
-	data.Form = snippetCreateForm{
-		Expires: 365,
-	}
-
+	data.Form = projectCreateForm{}
 	app.render(w, r, http.StatusOK, "create.tmpl", data)
 }
 
-func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	var form snippetCreateForm
+func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request) {
+	var form projectCreateForm
 
 	err := app.decodePostForm(r, &form)
 	if err != nil {
@@ -74,8 +144,6 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
-	form.CheckField(validator.NotBlank(form.Content), "content", "This field cannot be blank")
-	form.CheckField(validator.PermittedValue(form.Expires, 1, 7, 365), "expires", "This field must equal 1, 7 or 365")
 
 	if !form.Valid() {
 		data := app.newTemplateData(r)
@@ -84,15 +152,44 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
+	projectID, err := app.projects.Insert(form.Title, app.sessionManager.GetInt(r.Context(), "authenticatedUserID"))
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
+	err = r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+	files := r.MultipartForm.File["cfiles"]
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+		defer file.Close()
+
+		content := make([]byte, fileHeader.Size)
+		_, err = file.Read(content)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		_, err = app.cfiles.Insert(projectID, fileHeader.Filename, string(content))
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
+
+	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", projectID), http.StatusSeeOther)
 }
 
 type userSignupForm struct {
@@ -204,7 +301,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {

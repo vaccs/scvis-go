@@ -1,21 +1,56 @@
 {{define "title"}}Project #{{.Project.ID}}{{end}}
 
 {{define "main"}}
-    {{with .Project}}
-    <div class='project'>
-        <div class='metadata'>
-            <strong>{{.Title}}</strong>
-            <span>#{{.ID}}</span>
-        </div>
-        {{range .CFiles}}
-            <div class='cfiles'>
-            <strong>{{.Filename}}</strong>
-            <span>#{{.ID}}</span>
+    {{if .IsAuthenticated}}
+        {{with .Project}}
+        <div class='project'>
+            <div class='metadata'>
+                <strong>{{.Title}}</strong>
+                <span>#{{.ID}}</span>
             </div>
-        {{end}}
-        <div class='metadata'>
-            <time>Created: {{humanDate .Created}}</time>
+            <div>
+                {{if .CFiles}}
+                <form action="/project/delete" method="post">
+                    <label for="delete-files">C Files in Project:</label>
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Delete</th>
+                        </tr>
+                        {{range .CFiles}}
+                            <tr>
+                                <td><a href='/cfile/view/{{.ID}}'>{{.Title}}</a></td>
+                                <td>
+                                    <input type="checkbox" name="delete" value="{{.ID}}">
+                                </td>
+                            </tr>
+                        {{end}}
+                    </table>
+                    <button type="submit">Delete Selected Files</button>
+                </form>
+                {{else}}
+                    <p>There are no C files in this project yet!</p>    
+                {{end}}
+            </div>
+            <div>
+                <form action="/project/upload" method="post" enctype="multipart/form-data">
+                    <label for="upload-files">Upload new C files:</label>
+                    <input type="file" id="upload-files" name="upload-files" accept=".c" multiple>
+                    <button type="submit">Upload Files</button>
+                </form>
+            </div>
+            <div>
+                <form action="/project/view" method="post">
+                    <input type="hidden" name="action" value="Analyze">
+                    <button type="submit">Analyze Project</button>
+                </form>
+                <form action="/" method="get">
+                    <button type="submit">Cancel/Done</button>
+                </form>
+            </div>
         </div>
-    </div>
+        {{end}}
+    {{else}}
+        <p>Please <a href="/user/login">log in</a> to view a project.</p>
     {{end}}
 {{end}}

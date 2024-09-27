@@ -21,9 +21,10 @@ type ProjectModelInterface interface {
 	Insert(title string, userid int) (int, error)
 	Get(id int) (Project, error)
 	GetByUserId(userid int) ([]Project, error)
+	UpdateTitle(id int, title string) error
 	UpdateAnalysis(id int, analysis []map[string]interface{}) error
-	AddSingleCFile(id int, cfileid int) error
-	Latest() ([]Project, error)
+	AddCFiles(id int, cfileids []int) error
+	DeleteCFiles(id int, cfileids []int) error
 }
 
 // Define a ProjectModel type which wraps a sql.DB connection pool.
@@ -138,57 +139,88 @@ func (p *ProjectModel) UpdateAnalysis(id int, json_analysis []map[string]interfa
 	return nil
 }
 
-func (p *ProjectModel) AddSingleCFile(id int, cfileid int) error {
-	cfileidJSON, jerr := json.Marshal(cfileid)
-	if jerr != nil {
-		return jerr
-	}
-	stmt := `UPDATE projects SET cfileids = JSON_ARRAY_APPEND(cfileids, '$', ?) WHERE id = ?`
-	_, err := p.DB.Exec(stmt, cfileidJSON, id)
+func (p *ProjectModel) UpdateTitle(id int, title string) error {
+	stmt := `UPDATE projects SET title = ? WHERE id = ?`
+	_, err := p.DB.Exec(stmt, title, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *ProjectModel) Latest() ([]Project, error) {
-	stmt := `SELECT id, title, userid, cfileids, analysis, created_at FROM projects ORDER BY id DESC LIMIT 5`
-
-	rows, err := p.DB.Query(stmt)
+func (p *ProjectModel) AddCFiles(id int, cfileids []int) error {
+	// Retrieve the existing cfileids
+	stmt := `SELECT cfileids FROM projects WHERE id = ?`
+	var existingCFileIds []byte
+	err := p.DB.QueryRow(stmt, id).Scan(&existingCFileIds)
 	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var projects []Project
-	for rows.Next() {
-		var project Project
-		var cfileids []byte
-		var analysis []byte
-		err := rows.Scan(&project.ID, &project.Title, &project.Userid, &cfileids, &analysis, &project.Created)
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(cfileids, &project.CFileIds); err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(analysis, &project.Analysis); err != nil {
-			return nil, err
-		}
-
-		var CFiles CFileModel = CFileModel{DB: p.DB}
-		cfiles, err := CFiles.GetByProjectid(project.ID)
-
-		if err != nil {
-			return nil, err
-		}
-		project.CFiles = cfiles
-		projects = append(projects, project)
+		return err
 	}
 
-	if err = rows.Err(); err != nil {
-		return nil, err
+	var currentCFileIds []int
+	if err := json.Unmarshal(existingCFileIds, &currentCFileIds); err != nil {
+		return err
 	}
 
-	return projects, nil
+	// Append the new cfileids to the existing ones
+	currentCFileIds = append(currentCFileIds, cfileids...)
+
+	// Marshal the updated cfileids back to JSON
+	updatedCFileIds, err := json.Marshal(currentCFileIds)
+	if err != nil {
+		return err
+	}
+
+	// Update the project with the new cfileids
+	stmt = `UPDATE projects SET cfileids = ? WHERE id = ?`
+	_, err = p.DB.Exec(stmt, updatedCFileIds, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *ProjectModel) DeleteCFiles(id int, cfileids []int) error {
+	// Retrieve the existing cfileids
+	stmt := `SELECT cfileids FROM projects WHERE id = ?`
+	var existingCFileIds []byte
+	err := p.DB.QueryRow(stmt, id).Scan(&existingCFileIds)
+	if err != nil {
+		return err
+	}
+
+	var currentCFileIds []int
+	if err := json.Unmarshal(existingCFileIds, &currentCFileIds); err != nil {
+		return err
+	}
+
+	// Create a map for quick lookup of cfileids to delete
+	cfileidsToDelete := make(map[int]struct{})
+	for _, cfileid := range cfileids {
+		cfileidsToDelete[cfileid] = struct{}{}
+	}
+
+	// Filter out the cfileids to delete
+	var updatedCFileIds []int
+	for _, cfileid := range currentCFileIds {
+		if _, found := cfileidsToDelete[cfileid]; !found {
+			updatedCFileIds = append(updatedCFileIds, cfileid)
+		}
+	}
+
+	// Marshal the updated cfileids back to JSON
+	updatedCFileIdsJSON, err := json.Marshal(updatedCFileIds)
+	if err != nil {
+		return err
+	}
+
+	// Update the project with the new cfileids
+	stmt = `UPDATE projects SET cfileids = ? WHERE id = ?`
+	_, err = p.DB.Exec(stmt, updatedCFileIdsJSON, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

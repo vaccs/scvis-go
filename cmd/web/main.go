@@ -70,7 +70,6 @@ func main() {
 
 	app := &application{
 		logger:         logger,
-		snippets:       &models.SnippetModel{DB: db},
 		projects:       &models.ProjectModel{DB: db},
 		cfiles:         &models.CFileModel{DB: db},
 		users:          &models.UserModel{DB: db},

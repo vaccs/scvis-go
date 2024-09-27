@@ -1,23 +1,39 @@
 {{define "title"}}Home{{end}}
 
 {{define "main"}}
-    <h2>Recent Projects</h2>
-    {{if .Projects}}
-     <table>
-        <tr>
-            <th>Title</th>
-            <th>Created</th>
-            <th>ID</th>
-        </tr>
-        {{range .Projects}}
-        <tr>
-            <td><a href='/project/view/{{.ID}}'>{{.Title}}</a></td>
-            <td>{{humanDate .Created}}</td>
-            <td>#{{.ID}}</td>
-        </tr>
+    {{if .IsAuthenticated}}
+        <h2>Projects</h2>
+        {{if .Projects}}
+            <form method="post" action="/project/view">
+                <table>
+                    <tr>
+                        <th>Title</th>
+                        <th>Created</th>
+                        <th>Select</th>
+                    </tr>
+                    {{range .Projects}}
+                        <tr>
+                            <td><a href='/project/view/{{.ID}}'>{{.Title}}</a></td>
+                            <td>{{humanDate .Created}}</td>
+                            <td>
+                                <input type="checkbox" name="delete" value="{{.ID}}">
+                            </td>
+                        </tr>
+                    {{end}}
+                </table>
+                <div>
+                    <button class="raised-button" type="submit">
+                        Create New Project
+                    </button>
+                    <button class="raised-button" type="submit">
+                        Delete Selected Project(s)
+                    </button>
+                </div>
+            </form>
+        {{else}}
+            <p>There are no projects yet!</p>
         {{end}}
-    </table>
     {{else}}
-        <p>There are no projects yet!</p>
+        <p>Please <a href="/user/login">log in</a> to see your projects.</p>
     {{end}}
 {{end}}
