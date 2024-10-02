@@ -4,30 +4,21 @@
     {{if .IsAuthenticated}}
         <h2>Projects</h2>
         {{if .Projects}}
-            <form method="post" action="/project/view">
+            <form>
                 <table>
                     <tr>
                         <th>Title</th>
                         <th>Created</th>
-                        <th>Select</th>
                     </tr>
                     {{range .Projects}}
                         <tr>
                             <td><a href='/project/view/{{.ID}}'>{{.Title}}</a></td>
                             <td>{{humanDate .Created}}</td>
-                            <td>
-                                <input type="checkbox" name="delete" value="{{.ID}}">
-                            </td>
                         </tr>
                     {{end}}
                 </table>
                 <div>
-                    <button class="raised-button" type="submit">
-                        Create New Project
-                    </button>
-                    <button class="raised-button" type="submit">
-                        Delete Selected Project(s)
-                    </button>
+                    <input type='submit' formaction="/project/create" formmethod="get" value='Create Project'>
                 </div>
             </form>
         {{else}}

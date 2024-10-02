@@ -33,10 +33,15 @@ type ProjectModel struct {
 }
 
 func (p *ProjectModel) Insert(title string, userid int) (int, error) {
-	stmt := `INSERT INTO projects (title, userid, cfileids, analysis)
+	stmt := `INSERT INTO projects (title, userid, cfileids, analysis, created_at)
 	VALUES(?, ?, ?, ?, UTC_TIMESTAMP())`
 
-	result, err := p.DB.Exec(stmt, title, userid, []int{}, []map[string]interface{}{})
+	// Define default JSON values for cfileids and analysis
+	defaultCFileIds := "[]"
+	defaultAnalysis := "[]"
+
+	// Execute the database command with the provided values and default JSON values
+	result, err := p.DB.Exec(stmt, title, userid, defaultCFileIds, defaultAnalysis)
 	if err != nil {
 		return 0, err
 	}

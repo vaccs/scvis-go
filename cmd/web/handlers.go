@@ -26,6 +26,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
+	fmt.Printf("Project ID: %d\n", id)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -123,7 +124,7 @@ func (app *application) projectViewPost(w http.ResponseWriter, r *http.Request) 
 
 type projectCreateForm struct {
 	Title               string `form:"title"`
-	CFileIDs            []int  `form:"cfile_ids"`
+	CFileIDs            []int  `form:"files"`
 	validator.Validator `form:"-"`
 }
 
@@ -164,7 +165,7 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	files := r.MultipartForm.File["cfiles"]
+	files := r.MultipartForm.File["files"]
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
@@ -189,7 +190,17 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
 
-	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", projectID), http.StatusSeeOther)
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	projects, err := app.projects.GetByUserId(userID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Projects = projects
+
+	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
 type userSignupForm struct {

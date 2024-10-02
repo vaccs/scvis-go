@@ -4,13 +4,14 @@
     {{if .IsAuthenticated}}
         {{with .Project}}
         <div class='project'>
+            <form>
             <div class='metadata'>
                 <strong>{{.Title}}</strong>
                 <span>#{{.ID}}</span>
             </div>
             <div>
                 {{if .CFiles}}
-                <form action="/project/delete" method="post">
+                <form>
                     <label for="delete-files">C Files in Project:</label>
                     <table>
                         <tr>
@@ -33,21 +34,18 @@
                 {{end}}
             </div>
             <div>
-                <form action="/project/upload" method="post" enctype="multipart/form-data">
-                    <label for="upload-files">Upload new C files:</label>
-                    <input type="file" id="upload-files" name="upload-files" accept=".c" multiple>
-                    <button type="submit">Upload Files</button>
-                </form>
+                <input type="file" id="upload-files" name="upload-files" accept=".c" multiple>
+                <input type='submit' formaction="/project/upload" formmethod="post" value='Upload C Files'>
             </div>
             <div>
-                <form action="/project/view" method="post">
-                    <input type="hidden" name="action" value="Analyze">
-                    <button type="submit">Analyze Project</button>
-                </form>
-                <form action="/" method="get">
-                    <button type="submit">Cancel/Done</button>
-                </form>
+                <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze Project'>
+                <input type='submit' formaction="/project/visual" formmethod="post" value='Visual'>
+                {{if .CFiles}}
+                    <input type='submit' formaction="/project/delete" formmethod="post" value='Delete C Files'>
+                {{end}}
+                <input type="submit" formaction="/" formmethod="get" value="Done">
             </div>
+            </form>
         </div>
         {{end}}
     {{else}}

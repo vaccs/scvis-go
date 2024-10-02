@@ -2,7 +2,7 @@
 
 {{define "main"}}
     {{if .IsAuthenticated}}
-        <form action='/project/create' method='POST'>
+        <form enctype="multipart/form-data">
             <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
             <div>
                 <label>Title:</label>
@@ -16,8 +16,8 @@
                 <input type="file" id="files" name="files" accept=".c" multiple>
             </div>
             <div>
-                <input type='submit' value='Create Project'>
-                <button type="button" onclick="window.location.href='/';">Cancel</button>
+                <input type='submit' formaction="/project/create" formmethod="post" value='Create Project'>
+                <input type="submit" formaction="/" formmethod="get" value="Cancel">
             </div>
         </form>
     {{else}}

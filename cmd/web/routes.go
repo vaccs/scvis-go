@@ -21,7 +21,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /project/view/{id}", dynamic.ThenFunc(app.projectView))
 	mux.Handle("POST /project/view/{id}", dynamic.ThenFunc(app.projectViewPost))
 	mux.Handle("GET /project/create", dynamic.ThenFunc(app.projectCreate))
-	mux.Handle("POST /project/create", dynamic.ThenFunc(app.projectCreatePost))
+	mux.Handle("POST /project/create/{$}", dynamic.ThenFunc(app.projectCreatePost))
 	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignup))
 	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.userSignupPost))
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))
