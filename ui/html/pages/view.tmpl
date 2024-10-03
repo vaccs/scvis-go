@@ -39,7 +39,7 @@
             </div>
             <div>
                 <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze Project'>
-                <input type='submit' formaction="/project/visual" formmethod="post" value='Visual'>
+                <input type='submit' formaction="/project/visual" formmethod="get" value='Visual'>
                 {{if .CFiles}}
                     <input type='submit' formaction="/project/delete" formmethod="post" value='Delete C Files'>
                 {{end}}
