@@ -1,4 +1,4 @@
-module snippetbox.alexedwards.net
+module scvis.vaccsedu.org
 
 go 1.22.1
 

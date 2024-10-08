@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"snippetbox.alexedwards.net/internal/models"
-	"snippetbox.alexedwards.net/ui"
+	"scvis.vaccsedu.org/internal/models"
+	"scvis.vaccsedu.org/ui"
 )
 
 type templateData struct {

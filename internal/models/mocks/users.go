@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"snippetbox.alexedwards.net/internal/models"
+	"scvis.vaccsedu.org/internal/models"
 )
 
 type UserModel struct{}

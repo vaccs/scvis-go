@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os/exec"
 	"strconv"
 
-	"snippetbox.alexedwards.net/internal/models"
-	"snippetbox.alexedwards.net/internal/validator"
+	"scvis.vaccsedu.org/internal/models"
+	"scvis.vaccsedu.org/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -257,11 +256,6 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
 
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
-}
-
-func (app *application) projectVisualize(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Function: projectAnalyzePost")
-	exec.Command("open", "http://localhost:3000").Start()
 }
 
 type userLoginForm struct {

@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	"snippetbox.alexedwards.net/internal/models"
+	"scvis.vaccsedu.org/internal/models"
 
 	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
@@ -91,8 +91,10 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+	logger.Info("getting embedded build folder")
 
 	logger.Info("starting server", "addr", srv.Addr)
+	log.Println("Initializing application")
 
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	logger.Error(err.Error())

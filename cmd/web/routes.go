@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 
-	"snippetbox.alexedwards.net/ui"
+	"scvis.vaccsedu.org/scvis"
+	"scvis.vaccsedu.org/ui"
 
 	"github.com/justinas/alice"
 )
@@ -11,6 +12,7 @@ import (
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
+	mux.Handle("GET /scvis/", http.FileServerFS(scvis.Files))
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 
 	mux.HandleFunc("GET /ping", ping)
@@ -22,7 +24,6 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /project/view/{id}", dynamic.ThenFunc(app.projectViewPost))
 	mux.Handle("GET /project/create", dynamic.ThenFunc(app.projectCreate))
 	mux.Handle("POST /project/create/{$}", dynamic.ThenFunc(app.projectCreatePost))
-	mux.Handle("GET /project/visual", dynamic.ThenFunc(app.projectVisualize))
 	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignup))
 	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.userSignupPost))
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))

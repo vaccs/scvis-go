@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"snippetbox.alexedwards.net/internal/assert"
+	"scvis.vaccsedu.org/internal/assert"
 )
 
 func TestCommonHeaders(t *testing.T) {

@@ -24,7 +24,7 @@ header, nav, main, footer {
 main {
     margin-top: 54px;
     margin-bottom: 54px;
-    min-height: calc(100vh - 345px);
+    height: 50vh;
     overflow: auto;
 }
 
@@ -105,7 +105,7 @@ nav form {
 }
 
 nav div {
-    width: 50%;
+    width: 80%;
     float: left;
 }
 
