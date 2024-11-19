@@ -1,4 +1,4 @@
-package main
+package vaccs
 
 import (
 	"bytes"
@@ -374,27 +374,4 @@ func (vc *VaccsComm) makeEXECUTABLE(executable string) []byte {
 	writeInt(buf, len(executable))
 	buf.WriteString(executable)
 	return buf.Bytes()
-}
-
-func main() {
-
-	vaccs_comm := NewVaccsComm()
-
-	err := vaccs_comm.Connect()
-
-	defer vaccs_comm.Close()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	data, err := vaccs_comm.PerformAnalysis([]string{"test.c"}, []string{"int main() { return 0; }"}, []string{"-u", "-r", "-j"}, "testproject", []string{})
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(string(data))
 }
