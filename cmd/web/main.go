@@ -23,7 +23,6 @@ import (
 
 type application struct {
 	logger         *slog.Logger
-	snippets       models.SnippetModelInterface
 	projects       models.ProjectModelInterface
 	cfiles         models.CFileModelInterface
 	users          models.UserModelInterface

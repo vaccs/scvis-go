@@ -38,6 +38,8 @@
                 <input type='submit' formaction="/project/upload" formmethod="post" value='Upload C Files'>
             </div>
             <div>
+                <label for="cmd-params">Command-line parameters:</label>
+                <input type="text" id="cmd-params" name="cmd-params">
                 <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze Project'>
                 <input type='submit' formaction="/scvis" formmethod="get" value='Visual'>
                 {{if .CFiles}}

@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"scvis.vaccsedu.org/internal/models"
 	"scvis.vaccsedu.org/internal/validator"
+
+	"scvis.vaccsedu.org/internal/vaccs"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -327,6 +331,88 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	params := r.PathValue("cmd-params")
+	paramArray := strings.Fields(params)
+
+	project, err := app.projects.Get(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	cfiles, err := app.cfiles.GetByProjectid(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	var fileNames []string
+	var cSources []string
+	for _, cfile := range cfiles {
+		fileNames = append(fileNames, cfile.Filename)
+		cSources = append(cSources, cfile.CSource)
+	}
+
+	vargs := []string{"-u", "-r", "-j"}
+
+	vaccs_comm := vaccs.NewVaccsComm()
+
+	err = vaccs_comm.Connect()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	defer vaccs_comm.Close()
+
+	data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, project.Title, paramArray)
+
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.projects.UpdateAnalysis(id, data)
+
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/project/scvis?id=%d", id), http.StatusSeeOther)
+
+}
+
+func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	project, err := app.projects.Get(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	jsonData, err := json.Marshal(project.Analysis)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
+
 }
 
 func ping(w http.ResponseWriter, r *http.Request) {

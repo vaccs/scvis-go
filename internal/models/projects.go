@@ -22,7 +22,7 @@ type ProjectModelInterface interface {
 	Get(id int) (Project, error)
 	GetByUserId(userid int) ([]Project, error)
 	UpdateTitle(id int, title string) error
-	UpdateAnalysis(id int, analysis []map[string]interface{}) error
+	UpdateAnalysis(id int, analysis []byte) error
 	AddCFiles(id int, cfileids []int) error
 	DeleteCFiles(id int, cfileids []int) error
 }
@@ -131,7 +131,7 @@ func (p *ProjectModel) GetByUserId(userid int) ([]Project, error) {
 	return projects, nil
 }
 
-func (p *ProjectModel) UpdateAnalysis(id int, json_analysis []map[string]interface{}) error {
+func (p *ProjectModel) UpdateAnalysis(id int, json_analysis []byte) error {
 	analysis, jerr := json.Marshal(json_analysis)
 	if jerr != nil {
 		return jerr
