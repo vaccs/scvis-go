@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("home")
 	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	projects, err := app.projects.GetByUserId(userID)
 	if err != nil {
@@ -52,69 +54,115 @@ func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
-func (app *application) projectViewPost(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
+func (app *application) projectUpdate(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	id_str := r.Form.Get("id")
+	id, err := strconv.Atoi(id_str)
+	fmt.Printf("Project ID: %d\n", id)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
 
-	var form projectCreateForm
-	err = app.decodePostForm(r, &form)
+	project, err := app.projects.Get(id)
 	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
 		return
 	}
 
-	form.CheckField(validator.NotBlank(form.Title), "title", "This field cannot be blank")
-	form.CheckField(validator.MaxChars(form.Title, 100), "title", "This field cannot be more than 100 characters long")
+	data := app.newTemplateData(r)
+	data.Project = project
 
-	if !form.Valid() {
-		data := app.newTemplateData(r)
-		data.Form = form
-		app.render(w, r, http.StatusUnprocessableEntity, "view.tmpl", data)
+	app.render(w, r, http.StatusOK, "update.tmpl", data)
+}
+
+func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request) {
+	idStr := r.FormValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
 		return
 	}
-
-	err = app.projects.UpdateTitle(id, form.Title)
+	fmt.Println("projectUpdatePost: get project")
+	project, err := app.projects.Get(id)
 	if err != nil {
-		app.serverError(w, r, err)
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
 		return
 	}
 
+	fmt.Println("projectUpdatePost: parse form")
+	// Parse the multipart form
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
+		http.Error(w, "Error parsing form", http.StatusInternalServerError)
 		return
 	}
 
-	// Remove selected C files
-	for _, cfileID := range form.CFileIDs {
-		err = app.cfiles.Delete(cfileID)
-		if err != nil {
-			app.serverError(w, r, err)
-			return
-		}
-	}
-
-	// Add new C files
-	files := r.MultipartForm.File["cfiles"]
+	fmt.Println("projectUpdatePost: get files")
+	// Retrieve the files from form data
+	files := r.MultipartForm.File["upload-files"]
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
-			app.serverError(w, r, err)
+			http.Error(w, "Error opening file", http.StatusInternalServerError)
 			return
 		}
 		defer file.Close()
 
-		content := make([]byte, fileHeader.Size)
-		_, err = file.Read(content)
+		fileContent, err := io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Error reading file", http.StatusInternalServerError)
+			return
+		}
+
+		_, err = app.cfiles.Insert(id, fileHeader.Filename, string(fileContent))
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
 
-		_, err = app.cfiles.Insert(id, fileHeader.Filename, string(content))
+	}
+
+	title := r.MultipartForm.Value["title"][0]
+
+	fmt.Println("projectUpdatePost: update project title")
+
+	if title != project.Title {
+		err = app.projects.UpdateTitle(id, title)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+	}
+
+	fmt.Println("projectUpdatePost: delete selected cfiles")
+	// get the list of cfileids to delete
+	cfileids := []int{}
+	for _, idStr := range r.MultipartForm.Value["cfileids"] {
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+		cfileids = append(cfileids, id)
+	}
+
+	// delete the cfiles
+	for _, cfileID := range cfileids {
+		err = app.cfiles.Delete(cfileID)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
@@ -123,12 +171,11 @@ func (app *application) projectViewPost(w http.ResponseWriter, r *http.Request) 
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully updated!")
 
-	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/project/update?id=%d", id), http.StatusSeeOther)
 }
 
 type projectCreateForm struct {
 	Title               string `form:"title"`
-	CFileIDs            []int  `form:"files"`
 	validator.Validator `form:"-"`
 }
 
@@ -163,48 +210,9 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = r.ParseMultipartForm(10 << 20) // 10 MB
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	files := r.MultipartForm.File["files"]
-	for _, fileHeader := range files {
-		file, err := fileHeader.Open()
-		if err != nil {
-			app.serverError(w, r, err)
-			return
-		}
-		defer file.Close()
-
-		content := make([]byte, fileHeader.Size)
-		_, err = file.Read(content)
-		if err != nil {
-			app.serverError(w, r, err)
-			return
-		}
-
-		_, err = app.cfiles.Insert(projectID, fileHeader.Filename, string(content))
-		if err != nil {
-			app.serverError(w, r, err)
-			return
-		}
-	}
-
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
 
-	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
-	projects, err := app.projects.GetByUserId(userID)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	data := app.newTemplateData(r)
-	data.Projects = projects
-
-	app.render(w, r, http.StatusOK, "home.tmpl", data)
+	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", projectID), http.StatusSeeOther)
 }
 
 type userSignupForm struct {
@@ -332,8 +340,38 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
-
 func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	id_str := r.Form.Get("id")
+	id, err := strconv.Atoi(id_str)
+	fmt.Printf("Project ID: %d\n", id)
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	project, err := app.projects.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Project = project
+
+	app.render(w, r, http.StatusOK, "analyze.tmpl", data)
+}
+
+func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -387,7 +425,7 @@ func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/project/scvis?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/project/view?id=%d", id), http.StatusSeeOther)
 
 }
 

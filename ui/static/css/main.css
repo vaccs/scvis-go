@@ -143,6 +143,23 @@ nav a.live:after {
     -webkit-transform: rotate(-45deg);
 }
 
+button.link {
+    background: none;
+    border: none;
+    color: #62CB31;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+button.link:hover {
+    background-color: #4EB722;
+    color: #FFFFFF;
+    cursor: pointer;
+    text-decoration: none;
+}
+
 a.button, input[type="submit"] {
     background-color: #62CB31;
     border-radius: 3px;
@@ -223,17 +240,21 @@ textarea {
 }
 
 button {
-    background: none;
-    padding: 0;
+    background-color: #62CB31;
+    border-radius: 3px;
+    color: #FFFFFF;
+    padding: 18px 27px;
     border: none;
-    color: #62CB31;
-    text-decoration: none;
+    display: inline-block;
+    margin-top: 18px;
+    font-weight: 700;
 }
 
 button:hover {
-    color: #4EB722;
-    text-decoration: underline;
+    background-color: #4EB722;
+    color: #FFFFFF;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .project {
@@ -331,3 +352,7 @@ footer {
     color: #6A6C6F;
     text-align: center;
 }
+
+left-align {
+    text-align: left;
+  }

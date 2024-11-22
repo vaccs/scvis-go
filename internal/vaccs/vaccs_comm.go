@@ -39,7 +39,7 @@ func NewVaccsComm() *VaccsComm {
 
 func (vc *VaccsComm) Connect() error {
 	var err error
-	vc.socket, err = net.Dial("tcp", "localhost:3580")
+	vc.socket, err = net.Dial("tcp", "vaccs.cs.wmich.edu:3580")
 	if err != nil {
 		return err
 	}

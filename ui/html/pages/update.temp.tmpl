@@ -1,0 +1,15 @@
+{{define "title"}}Update a Project{{end}}
+
+{{define "main"}}
+    {{if .IsAuthenticated}}
+         <form enctype="multipart/form-data">
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+            <input type='text' name='title' value=''>
+            <label for="cfile">Upload .c file:</label>
+            <input type="file" id="upload-files" name="upload-files" accept=".c" multiple>
+            <input type='submit' formaction="/project/update?id={{.Project.ID}}" formmethod="post" value='Update Project'>
+        </form>
+    {{else}}
+        <p>Please <a href="/user/login">log in</a> to create a project.</p>
+    {{end}}
+{{end}}

@@ -1,0 +1,56 @@
+{{define "title"}}Project #{{.Project.ID}}{{end}}
+
+{{define "main"}}
+    {{if .IsAuthenticated}}
+        <div class='project'>
+            <div class='metadata'>
+                <strong>{{.Project.Title}}</strong>
+                <span>#{{.Project.ID}}</span>
+            </div>
+            <div>
+                {{if .Project.CFiles}}
+                    <label>C Files in Project:</label>
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                        </tr>
+                        {{range .Project.CFiles}}
+                            <tr>
+                                <td class="left-justify"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                            </tr>
+                        {{end}}
+                    </table>
+                {{else}}
+                    <p>There are no C files in this project, so analysis cannot be done!</p>    
+                {{end}}
+            </div>
+            <div>
+                {{if .Project.CFiles}}
+                <form>
+                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                    {{if .Project.Analysis}}
+                        <div>
+                            <input type='submit' formaction="/scvis" formmethod="get" value='Visualize Project'>
+                        </div>
+                    {{end}}
+                    <div>
+                        <label for="cmd-params">Analysis command-line parameters:</label>
+                        <input type="text" name="cmd-params">
+                    </div>
+                    <div>
+                        <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze Project'>
+                        <input type="submit" formaction="/" formmethod="post" value="Done">
+                    </div>
+                </form>
+                {{else}}
+                    <form>
+                        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                        <input type='submit' formaction="/" formmethod="post" value="Done">
+                    </form>
+                {{end}}
+            </div>
+        </div>
+    {{else}}
+        <p>Please <a href="/user/login">log in</a> to view a project.</p>
+    {{end}}
+{{end}}
