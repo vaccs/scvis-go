@@ -12,10 +12,6 @@
                 <input type='text' name='title' value='{{.Form.Title}}'>
             </div>
             <div>
-                <label for="files">Add C files:</label>
-                <input type="file" id="files" name="files" accept=".c" multiple>
-            </div>
-            <div>
                 <input type='submit' formaction="/project/create" formmethod="post" value='Create Project'>
                 <input type="submit" formaction="/" formmethod="get" value="Cancel">
             </div>

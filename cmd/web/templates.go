@@ -12,8 +12,6 @@ import (
 
 type templateData struct {
 	CurrentYear     int
-	Snippet         models.Snippet
-	Snippets        []models.Snippet
 	Project         models.Project
 	Projects        []models.Project
 	Form            any
