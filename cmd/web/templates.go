@@ -18,6 +18,7 @@ type templateData struct {
 	Flash           string
 	IsAuthenticated bool
 	CSRFToken       string
+	CFile           models.CFile
 }
 
 func humanDate(t time.Time) string {

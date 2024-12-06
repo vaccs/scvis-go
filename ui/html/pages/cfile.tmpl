@@ -2,8 +2,15 @@
 
 {{define "main"}}
     {{if .IsAuthenticated}}
-        <h2>{{.CFile.Name}}</h2>
-        <pre>{{.CFile.Source}}</pre>
+        <h2>{{.CFile.Filename}}</h2>
+        <pre>{{.CFile.CSource}}</pre>
+
+        <form>
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+            <div>
+                <input type='submit' formaction="/cfile/view/{{.CFile.ProjectID}}" formmethod="post" value='Back'>
+            </div>
+        </form>
     {{else}}
         <p>Please <a href="/user/login">log in</a> to view a C file from a project.</p>
     {{end}}

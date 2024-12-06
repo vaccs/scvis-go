@@ -9,36 +9,46 @@
             </div>
             <div>
                 {{if .Project.CFiles}}
-                    <label>C Files in Project:</label>
+                    <div>C Files in Project:</div>
                     <table>
-                        <tr>
-                            <th>Name</th>
+                        <tr> 
+                            <th style="text-align: left;">Name</th>
+                            <th style="text-align: left;">Analysis Done</th>
                         </tr>
-                        {{range .Project.CFiles}}
-                            <tr>
-                                <td class="left-justify"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
-                            </tr>
+                        {{if .Project.Analysis}}
+                            {{range .Project.CFiles}}
+                                <tr>
+                                    <td style="text-align: left;"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                                    <td style="text-align: left;"><span style="color: green;">&#10004;</span></td>
+                                </tr>
+                            {{end}}
+                        {{else}}
+                            {{range .Project.CFiles}}
+                                <tr>
+                                    <td style="text-align: left;"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                                    <td style="text-align: left;"><span style="color: red;">&#10008;</span></td>
+                                </tr>
+                            {{end}}
                         {{end}}
                     </table>
                 {{else}}
-                    <p>There are no C files in this project, so analysis cannot be done!</p>    
+                    <p>There are no C files in this project</p>    
                 {{end}}
             </div>
             <div>
                 {{if .Project.CFiles}}
                 <form>
-                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                    {{if .Project.Analysis}}
-                        <div>
-                            <input type='submit' formaction="/scvis" formmethod="get" value='Visualize Project'>
+                    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                    <input type='hidden' name='id' value='{{.Project.ID}}'>
+                    <div>
+                        <div id="command-line-section">
+                            <label for="command-params">Enter Analysis Command-line Parameters:</label>
+                            <input type="text" id="command-params" name="command-params" value='{{.Project.Parameters}}'>
                         </div>
-                    {{end}}
-                    <div>
-                        <label for="cmd-params">Analysis command-line parameters:</label>
-                        <input type="text" name="cmd-params">
-                    </div>
-                    <div>
-                        <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze Project'>
+                        {{if .Project.Analysis}}
+                            <input type='submit' formaction="/project/visual" formmethod="get" value='Visual'>
+                        {{end}}
+                        <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze'>
                         <input type="submit" formaction="/" formmethod="post" value="Done">
                     </div>
                 </form>

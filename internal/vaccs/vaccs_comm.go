@@ -3,8 +3,9 @@ package vaccs
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -31,22 +32,33 @@ const (
 
 type VaccsComm struct {
 	socket net.Conn
+	logger *slog.Logger
 }
 
-func NewVaccsComm() *VaccsComm {
-	return &VaccsComm{}
+func NewVaccsComm(logger *slog.Logger) *VaccsComm {
+	vc := &VaccsComm{}
+	vc.logger = logger
+	return vc
 }
 
 func (vc *VaccsComm) Connect() error {
 	var err error
-	vc.socket, err = net.Dial("tcp", "vaccs.cs.wmich.edu:3580")
+	vc.logger.Info("Connecting to localhost:3580")
+	vc.socket, err = net.Dial("tcp", "localhost:3580")
 	if err != nil {
 		return err
 	}
 
-	vc.socket.SetReadDeadline(time.Time{})
-
 	return nil
+}
+
+func (vc *VaccsComm) IsPortOpen() bool {
+	conn, err := net.DialTimeout("tcp", "localhost:3580", 2*time.Second)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
 }
 
 func (vc *VaccsComm) Close() {
@@ -54,139 +66,141 @@ func (vc *VaccsComm) Close() {
 }
 
 func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, vargs []string, executableName string, params []string) ([]byte, error) {
+	vc.logger.Info(tagToString(vSTARTCFILES))
 	err := vc.send(vc.makeSTARTCFILES(uint32(len(filenames))))
 
 	if err != nil {
-		log.Println("Error sending start cfiles")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
 	for i, filename := range filenames {
+		vc.logger.Info(tagToString(vCFILE))
 		err = vc.send(vc.makeCFILE(filename, cSources[i]))
 		if err != nil {
-			log.Println("Error sending cfile")
 			return nil, err
 		}
+		vc.logger.Info(tagToString(vACK))
 		err = vc.receive_ack()
 		if err != nil {
-			log.Println("Error receiving ack")
 			return nil, err
 		}
 	}
 
+	vc.logger.Info(tagToString(vENDCFILES))
 	err = vc.send(vc.makeENDCFILES())
 	if err != nil {
-		log.Println("Error sending end cfiles")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vSTARTVACCSARGS))
 	err = vc.send(vc.makeSTARTVACCSARG(uint32(len(vargs))))
 	if err != nil {
-		log.Println("Error sending start vaccsargs")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
 	for _, varg := range vargs {
+		vc.logger.Info(tagToString(vVACCSARGS) + ": " + varg)
 		data := vc.makeVACCSARG(varg)
 		err = vc.send(data)
 		if err != nil {
-			log.Println("Error sending vaccsarg")
 			return nil, err
 		}
+		vc.logger.Info(tagToString(vACK))
 		err = vc.receive_ack()
 		if err != nil {
-			log.Println("Error receiving ack")
 			return nil, err
 		}
 	}
 
+	vc.logger.Info(tagToString(vENDVACCSARGS))
 	err = vc.send(vc.makeENDVACCSARG())
 
 	if err != nil {
-		log.Println("Error sending end vaccsargs")
-		return nil, err
-	}
-	err = vc.receive_ack()
-	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
+	err = vc.receive_ack()
+	if err != nil {
+		return nil, err
+	}
+
+	vc.logger.Info(tagToString(vEXECUTABLE))
 	err = vc.send(vc.makeEXECUTABLE(executableName))
 	if err != nil {
-		log.Println("Error sending executable name")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vSTARTPARAMS))
 	err = vc.send(vc.makeSTARTPARAMS(uint32(len(params))))
 	if err != nil {
-		log.Println("Error sending start params")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
 	for _, param := range params {
+		vc.logger.Info(tagToString(vPARAM) + ": " + strconv.Itoa(len(params)))
 		data := vc.makePARAM(param)
 		err = vc.send(data)
 		if err != nil {
-			log.Println("Error sending param")
 			return nil, err
 		}
+		vc.logger.Info(tagToString(vACK))
 		err = vc.receive_ack()
 		if err != nil {
-			log.Println("Error receiving ack")
 			return nil, err
 		}
 	}
 
+	vc.logger.Info(tagToString(vENDPARAMS))
 	err = vc.send(vc.makeENDPARAMS())
 	if err != nil {
-		log.Println("Error sending end params")
 		return nil, err
 	}
+	vc.logger.Info(tagToString(vACK))
 	err = vc.receive_ack()
 	if err != nil {
-		log.Println("Error receiving ack")
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vVACCSFILE))
 	data, err := vc.receive_json()
 	if err != nil {
-		log.Println("Error receiving analysis data")
 		return nil, err
 	}
+
+	vc.logger.Info(tagToString(vACK))
 	err = vc.send_ack()
 	if err != nil {
-		log.Println("Error sending ack")
 		return nil, err
 	}
 
@@ -194,6 +208,7 @@ func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, varg
 }
 
 func (vc *VaccsComm) send(data []byte) error {
+	vc.socket.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	_, err := vc.socket.Write(data)
 	if err != nil {
 		return err
@@ -201,30 +216,71 @@ func (vc *VaccsComm) send(data []byte) error {
 	return nil
 }
 
+func tagToString(tag byte) string {
+	switch tag {
+	case vACK:
+		return "acknowledgement"
+	case vSTARTCFILES:
+		return "start sending C files"
+	case vCFILE:
+		return "send C file"
+	case vENDCFILES:
+		return "end sending C files"
+	case vSTARTPARAMS:
+		return "start sending execution parameters"
+	case vPARAM:
+		return "send execution parameter"
+	case vENDPARAMS:
+		return "end sending execution parameters"
+	case vVACCSFILE:
+		return "send analysis"
+	case vSTARTVACCSARGS:
+		return "start sending analysis arguments"
+	case vVACCSARGS:
+		return "send analysis argument"
+	case vENDVACCSARGS:
+		return "end sending analysis arguments"
+	case vEXECUTABLE:
+		return "send executable name"
+	case vSUCCESS:
+		return "Success"
+	case vFAILURE_COMPILE:
+		return "Compilation error"
+	case vFAILURE_ANALYZE:
+		return "Analysis error"
+	case vFAILURE_PROTOCOL:
+		return "Protocol error"
+	case vFAILURE_TIMEOUT:
+		return "Message timeout error"
+	case vFAILURE_SYSTEM:
+		return "System error while running analysis"
+	default:
+		return "Unknown tag " + strconv.Itoa(int(tag))
+	}
+}
+
 func makeAnalysisError(tag byte, log_data string) error {
 	if tag == vFAILURE_ANALYZE {
-		return fmt.Errorf("The analyzer failed on this project: \n" + log_data)
+		return fmt.Errorf("The analyzer failed on this project: " + tagToString(tag) + ", " + log_data)
 	} else if tag == vFAILURE_COMPILE {
-		return fmt.Errorf("The compiler failed on this project: \n" + log_data)
+		return fmt.Errorf("The compiler failed on this project: " + tagToString(tag) + ", " + log_data)
 	} else if tag == vFAILURE_PROTOCOL {
-		return fmt.Errorf("Communication with the analyzer failed on this project: \n" + log_data)
+		return fmt.Errorf("Communication with the analyzer failed on this project: " + tagToString(tag) + ", " + log_data)
 	} else if tag == vFAILURE_TIMEOUT {
-		return fmt.Errorf("The analyzer timed out on this project: \n" + log_data)
+		return fmt.Errorf("The analyzer timed out on this project: " + tagToString(tag) + ", " + log_data)
 	} else {
-		return fmt.Errorf("A system error occured while analyzing this project: \n" + log_data)
+		return fmt.Errorf("A system error occured while analyzing this project: " + tagToString(tag) + ", " + log_data)
 	}
 }
 
 func (vc *VaccsComm) read_bytes(n int) ([]byte, error) {
 	data := make([]byte, n)
 
+	vc.socket.SetReadDeadline(time.Now().Add(10 * time.Second))
 	num_bytes, err := vc.socket.Read(data)
 
 	if err != nil {
 		return nil, err
-	}
-	if data[0] > vSUCCESS {
-		return nil, makeAnalysisError(data[0], string(data[1:]))
 	} else if num_bytes != n {
 		return nil, fmt.Errorf("expected %d bytes, got %d", n, num_bytes)
 	}
@@ -233,6 +289,7 @@ func (vc *VaccsComm) read_bytes(n int) ([]byte, error) {
 }
 
 func (vc *VaccsComm) send_ack() error {
+	vc.socket.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	_, err := vc.socket.Write(vc.makeACK())
 	if err != nil {
 		return err
@@ -246,7 +303,7 @@ func (vc *VaccsComm) receive_ack() error {
 		return err
 	}
 	if header[0] != vACK {
-		return fmt.Errorf("protocol error: expected vACK, got %d", header[0])
+		return makeAnalysisError(header[0], "Expected acknowledgement, got "+tagToString(header[0]))
 	}
 	return nil
 }
@@ -254,18 +311,17 @@ func (vc *VaccsComm) receive_ack() error {
 func (vc *VaccsComm) receive_json() ([]byte, error) {
 	header, err := vc.read_bytes(5)
 	if err != nil {
-		log.Println("Error reading header")
 		return nil, err
 	}
 	if header[0] != vVACCSFILE {
-		return nil, fmt.Errorf("protocol error: expected vVACCSFILE, got %d", header[0])
+		return nil, makeAnalysisError(header[0], "Expected to receive analysis, got "+tagToString(header[0]))
 	}
 
 	sizeUint32 := uint32(header[1])<<24 | uint32(header[2])<<16 | uint32(header[3])<<8 | uint32(header[4])
+	vc.logger.Info("Reading analysis of size %d bytes\n", sizeUint32)
 	data, err := vc.read_bytes(int(sizeUint32))
 	if err != nil {
-		log.Println("Error reading analysis data")
-		return nil, err
+		return nil, makeAnalysisError(header[0], "Error reading analysis data")
 	}
 	err = vc.send(vc.makeACK())
 	if err != nil {
