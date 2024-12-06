@@ -8,7 +8,7 @@ import (
 
 type CFile struct {
 	ID        int
-	Projectid int
+	ProjectID int
 	Filename  string
 	CSource   string
 	Created   time.Time
@@ -51,7 +51,7 @@ func (c *CFileModel) Get(id int) (CFile, error) {
 	stmt := `SELECT id, projectid, filename, csource FROM cfiles WHERE id = ?`
 
 	var cfile CFile
-	err := c.DB.QueryRow(stmt, id).Scan(&cfile.ID, &cfile.Projectid, &cfile.Filename, &cfile.CSource)
+	err := c.DB.QueryRow(stmt, id).Scan(&cfile.ID, &cfile.ProjectID, &cfile.Filename, &cfile.CSource)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return CFile{}, fmt.Errorf("cfile not found")
@@ -74,7 +74,7 @@ func (c *CFileModel) GetByProjectid(projectid int) ([]CFile, error) {
 	var cfiles []CFile
 	for rows.Next() {
 		var cfile CFile
-		err := rows.Scan(&cfile.ID, &cfile.Projectid, &cfile.Filename, &cfile.CSource)
+		err := rows.Scan(&cfile.ID, &cfile.ProjectID, &cfile.Filename, &cfile.CSource)
 		if err != nil {
 			return nil, err
 		}

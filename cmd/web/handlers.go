@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"scvis.vaccsedu.org/internal/models"
 	"scvis.vaccsedu.org/internal/validator"
@@ -16,7 +17,7 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("home")
+	app.logger.Info("In home")
 	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	projects, err := app.projects.GetByUserId(userID)
 	if err != nil {
@@ -49,7 +50,7 @@ func (app *application) projectVisual(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
-	fmt.Printf("Project ID: %d\n", id)
+	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -80,7 +81,7 @@ func (app *application) projectUpdate(w http.ResponseWriter, r *http.Request) {
 
 	id_str := r.Form.Get("id")
 	id, err := strconv.Atoi(id_str)
-	fmt.Printf("Project ID: %d\n", id)
+	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -109,7 +110,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Println("projectUpdatePost: get project")
+	app.logger.Info("projectUpdatePost: get project")
 	project, err := app.projects.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -120,7 +121,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Println("projectUpdatePost: parse form")
+	app.logger.Info("projectUpdatePost: parse form")
 	// Parse the multipart form
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -128,7 +129,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	fmt.Println("projectUpdatePost: get files")
+	app.logger.Info("projectUpdatePost: get files")
 	// Retrieve the files from form data
 	files := r.MultipartForm.File["upload-files"]
 	for _, fileHeader := range files {
@@ -155,7 +156,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 
 	title := r.MultipartForm.Value["title"][0]
 
-	fmt.Println("projectUpdatePost: update project title")
+	app.logger.Info("projectUpdatePost: update project title")
 
 	if title != project.Title {
 		err = app.projects.UpdateTitle(id, title)
@@ -165,7 +166,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	fmt.Println("projectUpdatePost: delete selected cfiles")
+	app.logger.Info("projectUpdatePost: delete selected cfiles")
 	// get the list of cfileids to delete
 	cfileids := []int{}
 	for _, idStr := range r.MultipartForm.Value["cfileids"] {
@@ -357,6 +358,7 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
 func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -366,7 +368,7 @@ func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 
 	id_str := r.Form.Get("id")
 	id, err := strconv.Atoi(id_str)
-	fmt.Printf("Project ID: %d\n", id)
+	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -389,13 +391,25 @@ func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
+	app.logger.Info("projectAnalyzePost: entered")
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	app.logger.Info("Get project id for analysis")
+	idStr := r.FormValue("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
-	params := r.PathValue("cmd-params")
-	paramArray := strings.Fields(params)
+	paramArray := r.Form["command-params"]
+	app.logger.Info("Analysis parameters:")
+	for _, param := range paramArray {
+		app.logger.Info(param)
+	}
 
 	project, err := app.projects.Get(id)
 	if err != nil {
@@ -409,6 +423,11 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	app.logger.Info("C file names:")
+	for _, cfile := range cfiles {
+		app.logger.Info(cfile.Filename)
+	}
+
 	var fileNames []string
 	var cSources []string
 	for _, cfile := range cfiles {
@@ -418,8 +437,15 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 
 	vargs := []string{"-u", "-r", "-j"}
 
-	vaccs_comm := vaccs.NewVaccsComm()
+	vaccs_comm := vaccs.NewVaccsComm(app.logger)
 
+	app.logger.Info("Check if port is open")
+	if !vaccs_comm.IsPortOpen() {
+		app.serverError(w, r, errors.New("analysis is not working currently"))
+		return
+	}
+
+	app.logger.Info("Connect to analysis")
 	err = vaccs_comm.Connect()
 	if err != nil {
 		app.serverError(w, r, err)
@@ -428,21 +454,42 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 
 	defer vaccs_comm.Close()
 
-	data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, project.Title, paramArray)
+	safeTitle := strings.Map(func(r rune) rune {
+		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+			return '0'
+		}
+		return r
+	}, project.Title)
+
+	paramStr := strings.Join(paramArray, " ")
+	err = app.projects.UpdateParameters(id, paramStr)
 
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
-
-	err = app.projects.UpdateAnalysis(id, data)
+	app.logger.Info("Perform analyisis of project " + safeTitle)
+	data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, safeTitle, paramArray)
+	vaccs_comm.Close()
 
 	if err != nil {
-		app.serverError(w, r, err)
-		return
+		app.sessionManager.Put(r.Context(), "flash", "Analysis was unsuccessful!")
+		app.logger.Error(fmt.Sprintf("Error performing analysis: %s", err.Error()))
+	} else {
+
+		app.logger.Info("Update database")
+		err = app.projects.UpdateAnalysis(id, data)
+
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		app.sessionManager.Put(r.Context(), "flash", "Analysis was successful!")
+		app.logger.Info(fmt.Sprintf("Redirect to /project/analyze?id=%d", id))
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/project/view?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", id), http.StatusSeeOther)
 
 }
 
@@ -466,12 +513,6 @@ func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// project, err := app.projects.Get(id)
-	// if err != nil {
-	// 	app.serverError(w, r, err)
-	// 	return
-	// }
-
 	jsonData, err := json.Marshal(jsonString)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -481,4 +522,54 @@ func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 
+}
+
+func (app *application) cfileView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/cfile/view/"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	app.logger.Info(fmt.Sprintf("CFile ID: %d", id))
+	cfile, err := app.cfiles.Get(id)
+	app.logger.Info(fmt.Sprintf("CFile: %v", cfile))
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.CFile = cfile
+
+	app.render(w, r, http.StatusOK, "cfile.tmpl", data)
+}
+
+func (app *application) cfileViewPost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/cfile/view/"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	cfile, err := app.cfiles.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	project, err := app.projects.Get(cfile.ProjectID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", project.ID), http.StatusSeeOther)
 }
