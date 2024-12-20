@@ -26,11 +26,16 @@
                     <input type='submit' formaction="/project/update" formmethod="get" value='Update Project'>
                     <input type='submit' formaction="/project/analyze" formmethod="get" value='Analyze Project'>
                     <input type='submit' formaction="/project/visual" formmethod="get" value='Visualize Project'>
-                    <input type='submit' formaction="/project/delete" formmethod="post" value='Delete Project(s)'>
+                    <input type='submit' formaction="/project/delete" formmethod="get" value='Delete Project(s)'>
                 </div>
             </form>
         {{else}}
             <p>There are no projects yet!</p>
+            <form>
+                <div>
+                    <input type='submit' formaction="/project/create" formmethod="get" value='Create Project'>
+                </div>
+            </form>
         {{end}}
     {{else}}
         <p>Please <a href="/user/login">log in</a> to see your projects.</p>

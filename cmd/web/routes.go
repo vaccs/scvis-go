@@ -30,6 +30,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /project/analyze", protected.ThenFunc(app.projectAnalyzePost))
 	mux.Handle("GET /project/visual", protected.ThenFunc(app.projectVisual))
 	mux.Handle("GET /project/getanalysis", protected.ThenFunc(app.projectGetAnalysis))
+	mux.Handle("GET /project/delete", protected.ThenFunc(app.projectDelete))
 	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.userSignup))
 	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.userSignupPost))
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLogin))

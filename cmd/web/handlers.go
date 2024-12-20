@@ -17,7 +17,6 @@ import (
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("In home")
 	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
 	projects, err := app.projects.GetByUserId(userID)
 	if err != nil {
@@ -50,7 +49,6 @@ func (app *application) projectVisual(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
-	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -81,7 +79,6 @@ func (app *application) projectUpdate(w http.ResponseWriter, r *http.Request) {
 
 	id_str := r.Form.Get("id")
 	id, err := strconv.Atoi(id_str)
-	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -110,7 +107,6 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		http.NotFound(w, r)
 		return
 	}
-	app.logger.Info("projectUpdatePost: get project")
 	project, err := app.projects.Get(id)
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
@@ -121,7 +117,6 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	app.logger.Info("projectUpdatePost: parse form")
 	// Parse the multipart form
 	err = r.ParseMultipartForm(10 << 20) // 10 MB
 	if err != nil {
@@ -129,7 +124,6 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	app.logger.Info("projectUpdatePost: get files")
 	// Retrieve the files from form data
 	files := r.MultipartForm.File["upload-files"]
 	for _, fileHeader := range files {
@@ -156,8 +150,6 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 
 	title := r.MultipartForm.Value["title"][0]
 
-	app.logger.Info("projectUpdatePost: update project title")
-
 	if title != project.Title {
 		err = app.projects.UpdateTitle(id, title)
 		if err != nil {
@@ -166,7 +158,6 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	app.logger.Info("projectUpdatePost: delete selected cfiles")
 	// get the list of cfileids to delete
 	cfileids := []int{}
 	for _, idStr := range r.MultipartForm.Value["cfileids"] {
@@ -368,7 +359,6 @@ func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 
 	id_str := r.Form.Get("id")
 	id, err := strconv.Atoi(id_str)
-	app.logger.Info(fmt.Sprintf("Project ID: %d", id))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -391,14 +381,12 @@ func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Request) {
-	app.logger.Info("projectAnalyzePost: entered")
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	app.logger.Info("Get project id for analysis")
 	idStr := r.FormValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id < 1 {
@@ -406,11 +394,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	paramArray := r.Form["command-params"]
-	app.logger.Info("Analysis parameters:")
-	for _, param := range paramArray {
-		app.logger.Info(param)
-	}
-
 	project, err := app.projects.Get(id)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -421,11 +404,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		app.serverError(w, r, err)
 		return
-	}
-
-	app.logger.Info("C file names:")
-	for _, cfile := range cfiles {
-		app.logger.Info(cfile.Filename)
 	}
 
 	var fileNames []string
@@ -439,13 +417,11 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 
 	vaccs_comm := vaccs.NewVaccsComm(app.logger)
 
-	app.logger.Info("Check if port is open")
 	if !vaccs_comm.IsPortOpen() {
 		app.serverError(w, r, errors.New("analysis is not working currently"))
 		return
 	}
 
-	app.logger.Info("Connect to analysis")
 	err = vaccs_comm.Connect()
 	if err != nil {
 		app.serverError(w, r, err)
@@ -468,7 +444,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, r, err)
 		return
 	}
-	app.logger.Info("Perform analyisis of project " + safeTitle)
 	data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, safeTitle, paramArray)
 	vaccs_comm.Close()
 
@@ -477,7 +452,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		app.logger.Error(fmt.Sprintf("Error performing analysis: %s", err.Error()))
 	} else {
 
-		app.logger.Info("Update database")
 		err = app.projects.UpdateAnalysis(id, data)
 
 		if err != nil {
@@ -486,7 +460,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		}
 
 		app.sessionManager.Put(r.Context(), "flash", "Analysis was successful!")
-		app.logger.Info(fmt.Sprintf("Redirect to /project/analyze?id=%d", id))
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", id), http.StatusSeeOther)
@@ -494,8 +467,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Request) {
-
-	const jsonString = `[{"VACCS_ARCH":{"Event_num":-1,"Arch_type":1,"Heap_start":94400437915648,"Heap_end":140728349331448,"Stack_start":140728349470720,"Stack_end":140728349331456}},{"VACCS_CMD_LINE":{"Event_num":-1,"Cmd_line":"./t1 "}},{"VACCS_BINARY":{"Event_num":-1,"Path":"./t1"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":1,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"#include <cstdio.h>"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":2,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"int a;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":3,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"int c = 3;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"int main() {"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":5,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":""}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":6,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   int b;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":7,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":""}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":8,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   int *p = NULL;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":9,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":""}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":10,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   p = b; "}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":11,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   a = 1;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":12,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   b = 2;"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"   printf(\"a = %d, b = %d, *p = %d, c = %d\\n\",a, b, *p, c);"}},{"VACCS_CCODE":{"Event_num":-1,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","C_start_pos":0,"Source":"}"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|Type|Address|Size|Section Name"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb8318|28|.interp"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb8338|48|.note.gnu.property"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb8368|36|.note.gnu.build-id"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb838c|32|.note.ABI-tag"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb83b0|36|.gnu.hash"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|16|0x55db4eeb83d8|168|.dynsym"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|20|0x55db4eeb8480|143|.dynstr"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb8510|14|.gnu.version"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeb8520|48|.gnu.version_r"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|2|0x55db4eeb8550|192|.rela.dyn"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|2|0x55db4eeb8610|24|.rela.plt"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb9000|27|.init"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb9020|32|.plt"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb9040|16|.plt.got"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb9050|16|.plt.sec"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb9060|331|.text"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|4|0x55db4eeb91ac|13|.fini"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeba000|41|.rodata"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeba02c|52|.eh_frame_hdr"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eeba060|172|.eh_frame"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eebbdb8|8|.init_array"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eebbdc0|8|.fini_array"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|6|0x55db4eebbdc8|496|.dynamic"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|8|0x55db4eebbfb8|72|.got"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|5|0x55db4eebc000|20|.data"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|18|0x55db4eebc014|12|.bss"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|43|.comment"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|48|.debug_aranges"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|244|.debug_info"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|160|.debug_abbrev"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|98|.debug_line"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|220|.debug_str"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|17|0x0|84|.debug_line_str"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|15|0x0|912|.symtab"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|19|0x0|477|.strtab"}},{"VACCS_SECTION":{"Event_num":-1,"Info":"|21|0x0|362|.shstrtab"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37193,"C_line_num":4,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"nop edx, edi"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37197,"C_line_num":4,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"push rbp"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37198,"C_line_num":4,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov rbp, rsp"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37201,"C_line_num":4,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"sub rsp, 0x10"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37205,"C_line_num":8,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov qword ptr [rbp-0x8], 0x0"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37213,"C_line_num":10,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"lea rax, ptr [rbp-0xc]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37217,"C_line_num":10,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov qword ptr [rbp-0x8], rax"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37221,"C_line_num":11,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov dword ptr [rip+0x2ea9], 0x1"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37231,"C_line_num":12,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov dword ptr [rbp-0xc], 0x2"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37238,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov esi, dword ptr [rip+0x2e94]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37244,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov rax, qword ptr [rbp-0x8]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37248,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov ecx, dword ptr [rax]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37250,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov edx, dword ptr [rbp-0xc]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37253,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov eax, dword ptr [rip+0x2e8d]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37259,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov r8d, esi"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37262,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov esi, eax"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37264,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"lea rax, ptr [rip+0xe71]"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37271,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov rdi, rax"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37274,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov eax, 0x0"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37279,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"call 0x55db4eeb9050"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37284,"C_line_num":13,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"mov eax, 0x0"}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37289,"C_line_num":14,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"leave "}},{"VACCS_ASM":{"Event_num":-1,"Asm_line_num":37290,"C_line_num":14,"Asm_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.s","C_file_name":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Inst":"ret "}},{"VACCS_FUNCTION_INV":{"Event_num":1,"Line_num":0,"Path":"__NOCSOURCE__","Inv_line_num":0,"C_inv_path":"__NOCSOURCE__","Func_name":"_start","Address":140064791934592}},{"VACCS_FUNCTION_INV":{"Event_num":3,"Line_num":4,"Path":"","Inv_line_num":0,"C_inv_path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Func_name":"main","Address":140728349461256}},{"VACCS_RETURN_ADDR":{"Event_num":3,"Dynamic_link":140064477568400,"Return_address":1,"Function_name":"main"}},{"VACCS_LINE":{"Event_num":4,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c"}},{"VACCS_REGISTER":{"Event_num":4,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rsp","Value":140728349461248}},{"VACCS_REGISTER":{"Event_num":5,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rbp","Value":140728349461248}},{"VACCS_REGISTER":{"Event_num":6,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rsp","Value":140728349461232}},{"VACCS_REGISTER":{"Event_num":7,"Line_num":4,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rflags","Value":518}},{"VACCS_VAR_ACCESS":{"Event_num":8,"Line_num":8,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Scope":"main","Address":140728349461240,"Var_type":"<pointer>","Name":"p","Points_to":"","Value":"<NULL>"}},{"VACCS_RETURN_ADDR":{"Event_num":8,"Dynamic_link":140064477568400,"Return_address":1,"Function_name":"main"}},{"VACCS_LINE":{"Event_num":9,"Line_num":10,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c"}},{"VACCS_REGISTER":{"Event_num":9,"Line_num":10,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rax","Value":140728349461236}},{"VACCS_VAR_ACCESS":{"Event_num":10,"Line_num":10,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Scope":"main","Address":140728349461240,"Var_type":"<pointer>","Name":"p","Points_to":2,"Value":"0x7ffddf478af4"}},{"VACCS_VAR_ACCESS":{"Event_num":11,"Line_num":11,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Scope":"*G*","Address":94400410271768,"Var_type":"int","Name":"a","Points_to":"","Value":"1"}},{"VACCS_VAR_ACCESS":{"Event_num":12,"Line_num":12,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Scope":"main","Address":140728349461236,"Var_type":"int","Name":"b","Points_to":"","Value":"2"}},{"VACCS_VAR_ACCESS":{"Event_num":12,"Line_num":12,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Scope":"main","Address":140728349461240,"Var_type":"<pointer>","Name":"p","Points_to":2,"Value":"0x7ffddf478af4"}},{"VACCS_LINE":{"Event_num":13,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c"}},{"VACCS_REGISTER":{"Event_num":13,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"esi","Value":3}},{"VACCS_REGISTER":{"Event_num":14,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"ecx","Value":2}},{"VACCS_REGISTER":{"Event_num":15,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"edx","Value":2}},{"VACCS_REGISTER":{"Event_num":16,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"eax","Value":1}},{"VACCS_REGISTER":{"Event_num":17,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"r8d","Value":3}},{"VACCS_REGISTER":{"Event_num":18,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"esi","Value":1}},{"VACCS_REGISTER":{"Event_num":19,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rax","Value":94400410263560}},{"VACCS_REGISTER":{"Event_num":20,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rdi","Value":94400410263560}},{"VACCS_REGISTER":{"Event_num":21,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"eax","Value":0}},{"VACCS_REGISTER":{"Event_num":23,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rip","Value":94400410259536}},{"VACCS_REGISTER":{"Event_num":24,"Line_num":13,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rsp","Value":140728349461224}},{"VACCS_LINE":{"Event_num":26,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c"}},{"VACCS_REGISTER":{"Event_num":26,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rbp","Value":1}},{"VACCS_REGISTER":{"Event_num":27,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rsp","Value":140728349461256}},{"VACCS_RETURN":{"Event_num":28}},{"VACCS_REGISTER":{"Event_num":30,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rip","Value":140064477568400}},{"VACCS_REGISTER":{"Event_num":31,"Line_num":14,"Path":"/home/carr/dynamic_analysis/pin/source/tools/PAS/tests/test1.c","Register":"rsp","Value":140728349461264}},{"VACCS_RETURN":{"Event_num":35}}]`
 
 	cookie, err := r.Cookie("projectID")
 	if err != nil {
@@ -513,7 +484,17 @@ func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	jsonData, err := json.Marshal(jsonString)
+	project, err := app.projects.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	jsonData, err := json.Marshal(string(project.Analysis))
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -524,15 +505,38 @@ func (app *application) projectGetAnalysis(w http.ResponseWriter, r *http.Reques
 
 }
 
+func (app *application) projectDelete(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	id_str := r.Form.Get("id")
+	id, err := strconv.Atoi(id_str)
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	err = app.projects.Delete(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Project successfully deleted!")
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func (app *application) cfileView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/cfile/view/"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
 	}
-	app.logger.Info(fmt.Sprintf("CFile ID: %d", id))
 	cfile, err := app.cfiles.Get(id)
-	app.logger.Info(fmt.Sprintf("CFile: %v", cfile))
 	if err != nil {
 		if errors.Is(err, models.ErrNoRecord) {
 			http.NotFound(w, r)

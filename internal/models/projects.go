@@ -15,7 +15,7 @@ type Project struct {
 	Analysis   []byte        `json:"analysis"`
 	CFiles     []CFile
 	Created    time.Time
-	Parameters string
+	Parameters sql.NullString `db:"parameters"`
 }
 
 type ProjectModelInterface interface {
@@ -25,6 +25,7 @@ type ProjectModelInterface interface {
 	UpdateTitle(id int, title string) error
 	UpdateAnalysis(id int, analysis []byte) error
 	AddCFiles(id int, cfileids []int) error
+	Delete(id int) error
 	DeleteCFiles(id int, cfileids []int) error
 	UpdateParameters(id int, parameters string) error
 }
@@ -35,15 +36,16 @@ type ProjectModel struct {
 }
 
 func (p *ProjectModel) Insert(title string, userid int) (int, error) {
-	stmt := `INSERT INTO projects (title, userid, cfileids, analysis, created_at)
-	VALUES(?, ?, ?, ?, UTC_TIMESTAMP())`
+	stmt := `INSERT INTO projects (title, userid, cfileids, analysis, created_at, parameters)
+	VALUES(?, ?, ?, ?, UTC_TIMESTAMP(), ?)`
 
 	// Define default JSON values for cfileids and analysis
 	defaultCFileIds := "[]"
 	defaultAnalysis := "[]"
+	defaultParameters := ""
 
 	// Execute the database command with the provided values and default JSON values
-	result, err := p.DB.Exec(stmt, title, userid, defaultCFileIds, defaultAnalysis)
+	result, err := p.DB.Exec(stmt, title, userid, defaultCFileIds, defaultAnalysis, defaultParameters)
 	if err != nil {
 		return 0, err
 	}
@@ -87,7 +89,7 @@ func (p *ProjectModel) Get(id int) (Project, error) {
 }
 
 func (p *ProjectModel) GetByUserId(userid int) ([]Project, error) {
-	stmt := `SELECT id, title, userid, cfileids, analysis, created_at FROM projects WHERE userid = ?`
+	stmt := `SELECT id, title, userid, cfileids, analysis, created_at, parameters FROM projects WHERE userid = ?`
 
 	rows, err := p.DB.Query(stmt, userid)
 	if err != nil {
@@ -99,7 +101,7 @@ func (p *ProjectModel) GetByUserId(userid int) ([]Project, error) {
 	for rows.Next() {
 		var project Project
 		var cfileids []byte
-		err := rows.Scan(&project.ID, &project.Title, &project.Userid, &cfileids, &project.Analysis, &project.Created)
+		err := rows.Scan(&project.ID, &project.Title, &project.Userid, &cfileids, &project.Analysis, &project.Created, &project.Parameters)
 
 		if err != nil {
 			return nil, err
@@ -135,12 +137,8 @@ func (p *ProjectModel) UpdateParameters(id int, parameters string) error {
 }
 
 func (p *ProjectModel) UpdateAnalysis(id int, json_analysis []byte) error {
-	analysis, jerr := json.Marshal(json_analysis)
-	if jerr != nil {
-		return jerr
-	}
 	stmt := `UPDATE projects SET analysis = ? WHERE id = ?`
-	_, err := p.DB.Exec(stmt, analysis, id)
+	_, err := p.DB.Exec(stmt, json_analysis, id)
 	if err != nil {
 		return err
 	}
@@ -186,6 +184,15 @@ func (p *ProjectModel) AddCFiles(id int, cfileids []int) error {
 		return err
 	}
 
+	return nil
+}
+
+func (p *ProjectModel) Delete(id int) error {
+	stmt := `DELETE FROM projects WHERE id = ?`
+	_, err := p.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
