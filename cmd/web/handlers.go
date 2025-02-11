@@ -213,7 +213,7 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	projectID, err := app.projects.Insert(form.Title, app.sessionManager.GetInt(r.Context(), "authenticatedUserID"))
+	_, err = app.projects.Insert(form.Title, app.sessionManager.GetInt(r.Context(), "authenticatedUserID"))
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -221,7 +221,7 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
 
-	http.Redirect(w, r, fmt.Sprintf("/project/view/%d", projectID), http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 type userSignupForm struct {
@@ -399,67 +399,72 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, r, err)
 		return
 	}
-
-	cfiles, err := app.cfiles.GetByProjectid(id)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	var fileNames []string
-	var cSources []string
-	for _, cfile := range cfiles {
-		fileNames = append(fileNames, cfile.Filename)
-		cSources = append(cSources, cfile.CSource)
-	}
-
-	vargs := []string{"-u", "-r", "-j"}
-
-	vaccs_comm := vaccs.NewVaccsComm(app.logger)
-
-	if !vaccs_comm.IsPortOpen() {
-		app.serverError(w, r, errors.New("analysis is not working currently"))
-		return
-	}
-
-	err = vaccs_comm.Connect()
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	defer vaccs_comm.Close()
-
-	safeTitle := strings.Map(func(r rune) rune {
-		if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
-			return '0'
-		}
-		return r
-	}, project.Title)
-
 	paramStr := strings.Join(paramArray, " ")
-	err = app.projects.UpdateParameters(id, paramStr)
-
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-	data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, safeTitle, paramArray)
-	vaccs_comm.Close()
-
-	if err != nil {
-		app.sessionManager.Put(r.Context(), "flash", "Analysis was unsuccessful!")
-		app.logger.Error(fmt.Sprintf("Error performing analysis: %s", err.Error()))
+	if len(paramStr) > 255 {
+		app.sessionManager.Put(r.Context(), "flash", "Command line parameters exceed the limit of 255 charachters")
+		app.logger.Error("Error performing analysis: command line parameters more than 255 charachters")
 	} else {
 
-		err = app.projects.UpdateAnalysis(id, data)
-
+		cfiles, err := app.cfiles.GetByProjectid(id)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
 
-		app.sessionManager.Put(r.Context(), "flash", "Analysis was successful!")
+		var fileNames []string
+		var cSources []string
+		for _, cfile := range cfiles {
+			fileNames = append(fileNames, cfile.Filename)
+			cSources = append(cSources, cfile.CSource)
+		}
+
+		vargs := []string{"-u", "-r", "-j"}
+
+		vaccs_comm := vaccs.NewVaccsComm(app.logger)
+
+		if !vaccs_comm.IsPortOpen() {
+			app.serverError(w, r, errors.New("analysis is not working currently"))
+			return
+		}
+
+		err = vaccs_comm.Connect()
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		defer vaccs_comm.Close()
+
+		safeTitle := strings.Map(func(r rune) rune {
+			if !unicode.IsLetter(r) && !unicode.IsNumber(r) {
+				return '0'
+			}
+			return r
+		}, project.Title)
+
+		err = app.projects.UpdateParameters(id, paramStr)
+
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+		data, err := vaccs_comm.PerformAnalysis(fileNames, cSources, vargs, safeTitle, paramArray)
+		vaccs_comm.Close()
+
+		if err != nil {
+			app.sessionManager.Put(r.Context(), "flash", "Analysis was unsuccessful!")
+			app.logger.Error(fmt.Sprintf("Error performing analysis: %s", err.Error()))
+		} else {
+
+			err = app.projects.UpdateAnalysis(id, data)
+
+			if err != nil {
+				app.serverError(w, r, err)
+				return
+			}
+
+			app.sessionManager.Put(r.Context(), "flash", "Analysis was successful!")
+		}
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", id), http.StatusSeeOther)

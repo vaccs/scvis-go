@@ -8,7 +8,7 @@
         <form>
             <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
             <div>
-                <input type='submit' formaction="/cfile/view/{{.CFile.ProjectID}}" formmethod="post" value='Back'>
+                <input type='submit' formaction="/cfile/view/{{.CFile.ID}}" formmethod="post" value='Back'>
             </div>
         </form>
     {{else}}
