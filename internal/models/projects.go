@@ -15,7 +15,7 @@ type Project struct {
 	Analysis   []byte        `json:"analysis"`
 	CFiles     []CFile
 	Created    time.Time
-	Parameters sql.NullString `db:"parameters"`
+	Parameters string
 }
 
 type ProjectModelInterface interface {
@@ -128,6 +128,7 @@ func (p *ProjectModel) GetByUserId(userid int) ([]Project, error) {
 }
 
 func (p *ProjectModel) UpdateParameters(id int, parameters string) error {
+	fmt.Println("Updating parameters for project ID:", id, "with parameters:", parameters)
 	stmt := `UPDATE projects SET parameters = ? WHERE id = ?`
 	_, err := p.DB.Exec(stmt, parameters, id)
 	if err != nil {
