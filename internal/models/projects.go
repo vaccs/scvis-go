@@ -26,6 +26,7 @@ type ProjectModelInterface interface {
 	UpdateAnalysis(id int, analysis []byte) error
 	AddCFiles(id int, cfileids []int) error
 	Delete(id int) error
+	DeleteAnalysis(id int) error
 	DeleteCFiles(id int, cfileids []int) error
 	UpdateParameters(id int, parameters string) error
 }
@@ -140,6 +141,15 @@ func (p *ProjectModel) UpdateParameters(id int, parameters string) error {
 func (p *ProjectModel) UpdateAnalysis(id int, json_analysis []byte) error {
 	stmt := `UPDATE projects SET analysis = ? WHERE id = ?`
 	_, err := p.DB.Exec(stmt, json_analysis, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ProjectModel) DeleteAnalysis(id int) error {
+	stmt := `UPDATE projects SET analysis = ? WHERE id = ?`
+	_, err := p.DB.Exec(stmt, "[]", id)
 	if err != nil {
 		return err
 	}
