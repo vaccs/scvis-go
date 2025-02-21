@@ -46,7 +46,9 @@
                             <input type="text" id="command-params" name="command-params" value='{{.Project.Parameters}}'>
                         </div>
                         {{if .Project.Analysis}}
-                            <input type='submit' formaction="/project/visual" formmethod="get" value='Visual'>
+                            {{if gt (len .Project.Analysis) 0}}
+                                <input type='submit' formaction="/project/visual" formmethod="get" value='Visual'>
+                            {{end}}
                         {{end}}
                         <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze'>
                         <input type="submit" formaction="/" formmethod="post" value="Done">

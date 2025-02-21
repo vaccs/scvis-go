@@ -454,6 +454,11 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			app.sessionManager.Put(r.Context(), "flash", "Analysis was unsuccessful!")
 			app.logger.Error(fmt.Sprintf("Error performing analysis: %s", err.Error()))
+			err = app.projects.DeleteAnalysis(id)
+			if err != nil {
+				app.serverError(w, r, err)
+				return
+			}
 		} else {
 
 			err = app.projects.UpdateAnalysis(id, data)
