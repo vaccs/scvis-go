@@ -44,6 +44,7 @@ func (app *application) projectVisual(w http.ResponseWriter, r *http.Request) {
 		Path:  "/",
 	})
 
+	app.logger.Info("Serving Flutter web application")
 	http.Redirect(w, r, "/scvis", http.StatusSeeOther)
 }
 
