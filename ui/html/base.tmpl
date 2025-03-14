@@ -6,13 +6,13 @@
     <head>
         <meta charset='utf-8'>
         <title>{{template "title" .}} - Secure C Visual</title>
-        <link rel='stylesheet' href='/static/css/main.css'>
-        <link rel='shortcut icon' href='/static/img/scvis_small.png' type='image/x-icon'>
+        <link rel='stylesheet' href='/scvis/static/css/main.css' type='text/css'>
+        <link rel='shortcut icon' href='/scvis/static/img/scvis_small.png' type='image/x-icon'>
         <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700'>
     </head>
     <body>
         <header>
-            <a href='/'> <img src='/static/img/scvis.png' alt='Secure C Visual'>
+            <a href='/scvis/'> <img src='/scvis/static/img/scvis.png' alt='Secure C Visual'>
         </header>
         {{template "nav" .}}
         <main>
@@ -24,7 +24,7 @@
         <footer>
             Adapted from <a href='https:/https://lets-go.alexedwards.net//'>Let's Go</a> in {{.CurrentYear}}
         </footer>
-        <script src='/static/js/main.js' type='text/javascript'></script>
+        <script src='/scvis/static/js/main.js' type='text/javascript'></script>
     </body>
 </html>
 {{end}}

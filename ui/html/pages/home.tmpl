@@ -13,7 +13,7 @@
                     </tr>
                     {{range $index, $project := .Projects}}
                         <tr>
-                            <td><a href='/project/analyze?id={{$project.ID}}'>{{$project.Title}}</a></td>
+                            <td><a href='/scvis/project/analyze?id={{$project.ID}}'>{{$project.Title}}</a></td>
                             <td>{{humanDate .Created}}</td>
                             <td>
                                 <input type="radio" name="id" value="{{$project.ID}}" {{if eq $index 0}}checked{{end}}>
@@ -22,22 +22,22 @@
                     {{end}}
                 </table>
                 <div>
-                    <input type='submit' formaction="/project/create" formmethod="get" value='Create Project'>
-                    <input type='submit' formaction="/project/update" formmethod="get" value='Update Project'>
-                    <input type='submit' formaction="/project/analyze" formmethod="get" value='Analyze Project'>
-                    <input type='submit' formaction="/project/visual" formmethod="get" value='Visualize Project'>
-                    <input type='submit' formaction="/project/delete" formmethod="get" value='Delete Project(s)'>
+                    <input type='submit' formaction="/scvis/project/create" formmethod="get" value='Create Project'>
+                    <input type='submit' formaction="/scvis/project/update" formmethod="get" value='Update Project'>
+                    <input type='submit' formaction="/scvis/project/analyze" formmethod="get" value='Analyze Project'>
+                    <input type='submit' formaction="/scvis/project/visual" formmethod="get" value='Visualize Project'>
+                    <input type='submit' formaction="/scvis/project/delete" formmethod="get" value='Delete Project(s)'>
                 </div>
             </form>
         {{else}}
             <p>There are no projects yet!</p>
             <form>
                 <div>
-                    <input type='submit' formaction="/project/create" formmethod="get" value='Create Project'>
+                    <input type='submit' formaction="/scvis/project/create" formmethod="get" value='Create Project'>
                 </div>
             </form>
         {{end}}
     {{else}}
-        <p>Please <a href="/user/login">log in</a> to see your projects.</p>
+        <p>Please <a href="/scvis/user/login">log in</a> to see your projects.</p>
     {{end}}
 {{end}}

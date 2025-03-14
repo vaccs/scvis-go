@@ -41,11 +41,11 @@ func (app *application) projectVisual(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "projectID",
 		Value: idStr,
-		Path:  "/",
+		Path:  "/scvis/",
 	})
 
 	app.logger.Info("Serving Flutter web application")
-	http.Redirect(w, r, "/scvis", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/visual", http.StatusSeeOther)
 }
 
 func (app *application) projectView(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +181,7 @@ func (app *application) projectUpdatePost(w http.ResponseWriter, r *http.Request
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully updated!")
 
-	http.Redirect(w, r, fmt.Sprintf("/project/update?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/scvis/project/update?id=%d", id), http.StatusSeeOther)
 }
 
 type projectCreateForm struct {
@@ -222,7 +222,7 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }
 
 type userSignupForm struct {
@@ -277,7 +277,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
 
-	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/user/login", http.StatusSeeOther)
 }
 
 type userLoginForm struct {
@@ -334,7 +334,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }
 
 func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
@@ -348,7 +348,7 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "You've been logged out successfully!")
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }
 
 func (app *application) projectAnalyze(w http.ResponseWriter, r *http.Request) {
@@ -473,7 +473,7 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/scvis/project/analyze?id=%d", id), http.StatusSeeOther)
 
 }
 
@@ -538,11 +538,11 @@ func (app *application) projectDelete(w http.ResponseWriter, r *http.Request) {
 
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully deleted!")
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }
 
 func (app *application) cfileView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/cfile/view/"))
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/scvis/cfile/view/"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -564,7 +564,7 @@ func (app *application) cfileView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) cfileViewPost(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/cfile/view/"))
+	id, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/scvis/cfile/view/"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
 		return
@@ -586,5 +586,5 @@ func (app *application) cfileViewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/project/analyze?id=%d", project.ID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/scvis/project/analyze?id=%d", project.ID), http.StatusSeeOther)
 }
