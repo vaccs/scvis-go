@@ -18,14 +18,14 @@
                         {{if .Project.Analysis}}
                             {{range .Project.CFiles}}
                                 <tr>
-                                    <td style="text-align: left;"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                                    <td style="text-align: left;"><a href='/scvis/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
                                     <td style="text-align: left;"><span style="color: green;">&#10004;</span></td>
                                 </tr>
                             {{end}}
                         {{else}}
                             {{range .Project.CFiles}}
                                 <tr>
-                                    <td style="text-align: left;"><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                                    <td style="text-align: left;"><a href='/scvis/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
                                     <td style="text-align: left;"><span style="color: red;">&#10008;</span></td>
                                 </tr>
                             {{end}}
@@ -47,22 +47,22 @@
                         </div>
                         {{if .Project.Analysis}}
                             {{if gt (len .Project.Analysis) 0}}
-                                <input type='submit' formaction="/project/visual" formmethod="get" value='Visual'>
+                                <input type='submit' formaction="/scvis/project/visual" formmethod="get" value='Visual'>
                             {{end}}
                         {{end}}
-                        <input type='submit' formaction="/project/analyze" formmethod="post" value='Analyze'>
-                        <input type="submit" formaction="/" formmethod="post" value="Done">
+                        <input type='submit' formaction="/scvis/project/analyze" formmethod="post" value='Analyze'>
+                        <input type="submit" formaction="/scvis/" formmethod="post" value="Done">
                     </div>
                 </form>
                 {{else}}
                     <form>
                         <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                        <input type='submit' formaction="/" formmethod="post" value="Done">
+                        <input type='submit' formaction="/scvis/" formmethod="post" value="Done">
                     </form>
                 {{end}}
             </div>
         </div>
     {{else}}
-        <p>Please <a href="/user/login">log in</a> to view a project.</p>
+        <p>Please <a href="/scvis/user/login">log in</a> to view a project.</p>
     {{end}}
 {{end}}

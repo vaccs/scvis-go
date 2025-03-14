@@ -12,11 +12,11 @@
                 <input type='text' name='title' value='{{.Form.Title}}'>
             </div>
             <div>
-                <input type='submit' formaction="/project/create" formmethod="post" value='Create Project'>
-                <input type="submit" formaction="/" formmethod="get" value="Cancel">
+                <input type='submit' formaction="/scvis/project/create" formmethod="post" value='Create Project'>
+                <input type="submit" formaction="/scvis/" formmethod="get" value="Cancel">
             </div>
         </form>
     {{else}}
-        <p>Please <a href="/user/login">log in</a> to create a project.</p>
+        <p>Please <a href="/scvis/user/login">log in</a> to create a project.</p>
     {{end}}
 {{end}}

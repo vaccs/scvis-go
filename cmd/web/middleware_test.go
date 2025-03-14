@@ -13,7 +13,7 @@ import (
 func TestCommonHeaders(t *testing.T) {
 	rr := httptest.NewRecorder()
 
-	r, err := http.NewRequest(http.MethodGet, "/", nil)
+	r, err := http.NewRequest(http.MethodGet, "/scvis/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

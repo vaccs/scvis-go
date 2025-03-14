@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/scvis/visual/static/css/main.bfa1ad64.css",
+    "main.js": "/scvis/visual/static/js/main.560256dc.js",
+    "static/js/453.368bde0c.chunk.js": "/scvis/visual/static/js/453.368bde0c.chunk.js",
+    "index.html": "/scvis/visual/index.html",
+    "main.bfa1ad64.css.map": "/scvis/visual/static/css/main.bfa1ad64.css.map",
+    "main.560256dc.js.map": "/scvis/visual/static/js/main.560256dc.js.map",
+    "453.368bde0c.chunk.js.map": "/scvis/visual/static/js/453.368bde0c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bfa1ad64.css",
+    "static/js/main.560256dc.js"
+  ]
+}

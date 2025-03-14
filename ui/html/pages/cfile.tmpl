@@ -8,10 +8,10 @@
         <form>
             <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
             <div>
-                <input type='submit' formaction="/cfile/view/{{.CFile.ID}}" formmethod="post" value='Back'>
+                <input type='submit' formaction="/scvis/cfile/view/{{.CFile.ID}}" formmethod="post" value='Back'>
             </div>
         </form>
     {{else}}
-        <p>Please <a href="/user/login">log in</a> to view a C file from a project.</p>
+        <p>Please <a href="/scvis/user/login">log in</a> to view a C file from a project.</p>
     {{end}}
 {{end}}

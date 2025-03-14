@@ -1,15 +1,15 @@
 {{define "nav"}}
 <nav>
     <div>
-        <a href='/'>Home</a>
+        <a href='/scvis/'>Home</a>
         {{if .IsAuthenticated}}
-            <form action='/user/logout' method='POST'>
+            <form action='/scvis/user/logout' method='POST'>
                 <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
                 <button class='link'>Logout</button>
             </form>
         {{else}}
-            <a href='/user/signup'>Signup</a>
-            <a href='/user/login'>Login</a>
+            <a href='/scvis/user/signup'>Signup</a>
+            <a href='/scvis/user/login'>Login</a>
         {{end}}
     </div>
 </nav>

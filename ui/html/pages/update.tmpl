@@ -18,7 +18,7 @@
                     </tr>
                     {{range .Project.CFiles}}
                         <tr>
-                            <td><a href='/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
+                            <td><a href='/scvis/cfile/view/{{.ID}}'>{{.Filename}}</a></td>
                              <td>
                                 <input type="checkbox" name="cfilesids" value="{{.ID}}">
                              </td>
@@ -33,11 +33,11 @@
             <input type="file" name="upload-files" accept=".c" multiple>
         </div>
         <div>
-            <input type="submit" formaction="/project/update?id={{.Project.ID}}" formmethod="post" value="Update">
-            <input type="submit" formaction="/" formmethod="post" value="Done">
+            <input type="submit" formaction="/scvis/project/update?id={{.Project.ID}}" formmethod="post" value="Update">
+            <input type="submit" formaction="/scvis/" formmethod="post" value="Done">
         </div>
         </form>
     {{else}}
-        <p>Please <a href="/user/login">log in</a> to create a project.</p>
+        <p>Please <a href="/scvis/user/login">log in</a> to create a project.</p>
     {{end}}
 {{end}}
