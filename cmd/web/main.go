@@ -32,9 +32,9 @@ type application struct {
 }
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("/etc/scvisual/scvisual.conf")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
 	}
 
 	dbUser := os.Getenv("DB_USER")
@@ -45,7 +45,21 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logDir := "/var/log/scvisual"
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		err = os.MkdirAll(logDir, 0755)
+		if err != nil {
+			log.Fatalf("Failed to create log directory: %v", err)
+		}
+	}
+
+	logFile, err := os.CreateTemp(logDir, "scvisual-*.log")
+	if err != nil {
+		log.Fatalf("Failed to create log file: %v", err)
+	}
+	defer logFile.Close()
+
+	logger := slog.New(slog.NewTextHandler(logFile, nil))
 
 	db, err := openDB(*dsn)
 	if err != nil {
@@ -77,8 +91,12 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
+	// tlsConfig := &tls.Config{
+	// 	CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	// }
+
 	tlsConfig := &tls.Config{
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
 	}
 
 	srv := &http.Server{
@@ -95,7 +113,7 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr)
 	log.Println("Initializing application")
 
-	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
 	logger.Error(err.Error())
 	os.Exit(1)
 }
