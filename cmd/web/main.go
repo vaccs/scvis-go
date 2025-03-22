@@ -32,10 +32,14 @@ type application struct {
 }
 
 func main() {
-	err := godotenv.Load("/etc/scvisual/scvisual.conf")
+	err := godotenv.Load("./scvisual.conf")
 	if err != nil {
-		log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
+		log.Fatal("Error loading ./scvisual.conf file")
 	}
+	// err := godotenv.Load("/etc/scvisual/scvisual.conf")
+	// if err != nil {
+	// 	log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
+	// }
 
 	dbUser := os.Getenv("DB_USER")
 	dbPasswd := os.Getenv("DB_PASSWD")
@@ -45,13 +49,21 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	logDir := "/var/log/scvisual"
+	logDir := "./log/scvisual"
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
 		err = os.MkdirAll(logDir, 0755)
 		if err != nil {
 			log.Fatalf("Failed to create log directory: %v", err)
 		}
 	}
+
+	// logDir := "/var/log/scvisual"
+	// if _, err := os.Stat(logDir); os.IsNotExist(err) {
+	// 	err = os.MkdirAll(logDir, 0755)
+	// 	if err != nil {
+	// 		log.Fatalf("Failed to create log directory: %v", err)
+	// 	}
+	// }
 
 	logFile, err := os.CreateTemp(logDir, "scvisual-*.log")
 	if err != nil {
@@ -91,13 +103,13 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	// tlsConfig := &tls.Config{
-	// 	CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-	// }
-
 	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
+
+	// tlsConfig := &tls.Config{
+	// 	MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
+	// }
 
 	srv := &http.Server{
 		Addr:         *addr,
@@ -113,7 +125,9 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr)
 	log.Println("Initializing application")
 
-	err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
+	// err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
+	// err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = srv.ListenAndServeTLS("./tls/vaccsedu.org+3.pem", "./tls/vaccsedu.org+3-key.pem")
 	logger.Error(err.Error())
 	os.Exit(1)
 }

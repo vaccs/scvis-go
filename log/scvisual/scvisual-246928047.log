@@ -1,0 +1,15 @@
+time=2025-03-22T18:52:07.761-04:00 level=INFO msg="getting embedded build folder"
+time=2025-03-22T18:52:07.761-04:00 level=INFO msg="starting server" addr=:4000
+time=2025-03-22T18:52:14.674-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:52:16.831-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=Waatxezb9CVkI8ZJPzfuK6HMJsCZX5K0J8eeB9l1SjkjH%2FUqeKBo6MgPJaEYh7XZAQuzuM2kC5g9tzMacV%2BtOw%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:52:16.834-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:52:16.843-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/
+time=2025-03-22T18:52:16.859-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter_bootstrap.js
+time=2025-03-22T18:52:16.869-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:52:16.871-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/main.dart.js
+time=2025-03-22T18:52:16.940-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/FontManifest.json
+time=2025-03-22T18:52:16.952-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/fonts/MaterialIcons-Regular.otf
+time=2025-03-22T18:52:16.953-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+time=2025-03-22T18:52:16.965-04:00 level=INFO msg="received request" ip=[::1]:55807 proto=HTTP/2.0 method=GET uri=/scvis/visual/manifest.json
+time=2025-03-22T18:52:16.967-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri=/scvis/visual/icons/Icon-192.png
+time=2025-03-22T18:52:18.477-04:00 level=INFO msg="received request" ip=[::1]:55796 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"

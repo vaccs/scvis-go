@@ -1,0 +1,12 @@
+time=2025-03-22T18:59:12.729-04:00 level=INFO msg="getting embedded build folder"
+time=2025-03-22T18:59:12.730-04:00 level=INFO msg="starting server" addr=:4000
+time=2025-03-22T18:59:16.069-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:59:16.894-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:59:16.912-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T18:59:16.912-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T18:59:16.912-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T18:59:16.944-04:00 level=INFO msg="received request" ip=[::1]:57777 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis_small.png
+time=2025-03-22T18:59:19.142-04:00 level=INFO msg="received request" ip=[::1]:57793 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=vEHs978eCSuqZ4GFsQFq8%2FDdUqJ0C2len6P7F%2Fd3G37G%2BLQYK2WV5gZLYm2WsTEBUBrH2iDw8HKF01YKX138fA%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:59:19.143-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:59:19.181-04:00 level=INFO msg="received request" ip=[::1]:57793 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:59:20.813-04:00 level=INFO msg="received request" ip=[::1]:57793 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"

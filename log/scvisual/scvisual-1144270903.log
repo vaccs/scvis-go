@@ -1,0 +1,26 @@
+time=2025-03-22T17:24:55.302-04:00 level=INFO msg="getting embedded build folder"
+time=2025-03-22T17:24:55.302-04:00 level=INFO msg="starting server" addr=:4000
+time=2025-03-22T17:24:59.386-04:00 level=ERROR msg="http: TLS handshake error from [::1]:65511: remote error: tls: unknown certificate"
+time=2025-03-22T17:24:59.394-04:00 level=ERROR msg="http: TLS handshake error from [::1]:65512: remote error: tls: unknown certificate"
+time=2025-03-22T17:24:59.398-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T17:24:59.411-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T17:24:59.413-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T17:24:59.413-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T17:25:02.661-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=POST uri=/scvis/
+time=2025-03-22T17:25:02.684-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T17:25:02.685-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T17:25:02.685-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T17:25:04.093-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T17:25:04.113-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T17:25:04.113-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T17:25:04.113-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T17:25:05.247-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=ku4zHxRjBTY1CQSCW2%2Fl15rkI2hMD1x9Dc5hJyQ4uVroV2vwgBiZ%2B5kl52p8374lOiO2EBj0xVEXvsw6jBJeWA%3D%3D&id=12&command-params=0123"
+time=2025-03-22T17:25:05.249-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T17:25:05.256-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/visual
+time=2025-03-22T17:25:05.259-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/scvis/visual/
+time=2025-03-22T17:25:05.270-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/flutter_bootstrap.js
+time=2025-03-22T17:25:05.295-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri=/favicon.png
+time=2025-03-22T17:25:05.295-04:00 level=ERROR msg="http: TLS handshake error from [::1]:49156: remote error: tls: unknown certificate"
+time=2025-03-22T17:25:05.299-04:00 level=INFO msg="received request" ip=[::1]:49157 proto=HTTP/2.0 method=GET uri=/manifest.json
+time=2025-03-22T17:25:21.859-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T17:25:26.029-04:00 level=INFO msg="received request" ip=[::1]:65513 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"scvis.vaccsedu.org/ui"
-	"scvis.vaccsedu.org/visual"
 
 	"github.com/justinas/alice"
 )
@@ -12,7 +11,8 @@ import (
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /scvis/visual/", http.FileServerFS(visual.Files))
+	mux.Handle("/scvis/visual/", http.StripPrefix("/scvis/visual/", http.FileServer(http.Dir("./visual/scvis"))))
+	// mux.Handle("GET /scvis/visual/", http.FileServerFS(visual.Files))
 	mux.Handle("GET /scvis/static/", http.FileServerFS(ui.Files))
 
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
