@@ -31,15 +31,25 @@ type application struct {
 	sessionManager *scs.SessionManager
 }
 
+var localServer bool
+
+func init() {
+	flag.BoolVar(&localServer, "local", false, "Run server in local mode")
+}
 func main() {
-	err := godotenv.Load("./scvisual.conf")
-	if err != nil {
-		log.Fatal("Error loading ./scvisual.conf file")
+	flag.Parse()
+
+	if localServer {
+		err := godotenv.Load("./scvisual.conf")
+		if err != nil {
+			log.Fatal("Error loading ./scvisual.conf file")
+		}
+	} else {
+		err := godotenv.Load("/etc/scvisual/scvisual.conf")
+		if err != nil {
+			log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
+		}
 	}
-	// err := godotenv.Load("/etc/scvisual/scvisual.conf")
-	// if err != nil {
-	// 	log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
-	// }
 
 	dbUser := os.Getenv("DB_USER")
 	dbPasswd := os.Getenv("DB_PASSWD")
@@ -49,21 +59,18 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	logDir := "./log/scvisual"
+	var logDir string
+	if localServer {
+		logDir = "./log/scvisual"
+	} else {
+		logDir = "/var/log/scvisual"
+	}
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
 		err = os.MkdirAll(logDir, 0755)
 		if err != nil {
 			log.Fatalf("Failed to create log directory: %v", err)
 		}
 	}
-
-	// logDir := "/var/log/scvisual"
-	// if _, err := os.Stat(logDir); os.IsNotExist(err) {
-	// 	err = os.MkdirAll(logDir, 0755)
-	// 	if err != nil {
-	// 		log.Fatalf("Failed to create log directory: %v", err)
-	// 	}
-	// }
 
 	logFile, err := os.CreateTemp(logDir, "scvisual-*.log")
 	if err != nil {
@@ -103,13 +110,17 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	tlsConfig := &tls.Config{
-		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-	}
+	var tlsConfig *tls.Config
+	if localServer {
+		tlsConfig = &tls.Config{
+			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		}
+	} else {
 
-	// tlsConfig := &tls.Config{
-	// 	MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
-	// }
+		tlsConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
+		}
+	}
 
 	srv := &http.Server{
 		Addr:         *addr,
@@ -125,9 +136,11 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr)
 	log.Println("Initializing application")
 
-	// err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
-	// err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
-	err = srv.ListenAndServeTLS("./tls/vaccsedu.org+3.pem", "./tls/vaccsedu.org+3-key.pem")
+	if localServer {
+		err = srv.ListenAndServeTLS("./tls/vaccsedu.org+3.pem", "./tls/vaccsedu.org+3-key.pem")
+	} else {
+		err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
+	}
 	logger.Error(err.Error())
 	os.Exit(1)
 }
