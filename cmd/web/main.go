@@ -110,16 +110,8 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	var tlsConfig *tls.Config
-	if localServer {
-		tlsConfig = &tls.Config{
-			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
-		}
-	} else {
-
-		tlsConfig = &tls.Config{
-			MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
-		}
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12, // Ensure TLS 1.2 or higher
 	}
 
 	srv := &http.Server{
@@ -137,7 +129,10 @@ func main() {
 	log.Println("Initializing application")
 
 	if localServer {
-		err = srv.ListenAndServeTLS("./tls/vaccsedu.org+3.pem", "./tls/vaccsedu.org+3-key.pem")
+		err = srv.ListenAndServeTLS("./tls/localhost.pem", "./tls/localhost-key.pem")
+		if err != nil {
+			log.Println("Error starting server:", err)
+		}
 	} else {
 		err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
 	}
