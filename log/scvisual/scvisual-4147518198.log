@@ -1,0 +1,23 @@
+time=2025-03-22T18:18:08.486-04:00 level=INFO msg="getting embedded build folder"
+time=2025-03-22T18:18:08.487-04:00 level=INFO msg="starting server" addr=:4000
+time=2025-03-22T18:18:18.015-04:00 level=ERROR msg="http: TLS handshake error from [::1]:63921: remote error: tls: unknown certificate"
+time=2025-03-22T18:18:18.018-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:18:18.114-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T18:18:18.116-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T18:18:18.116-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T18:18:18.170-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis_small.png
+time=2025-03-22T18:18:20.101-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=Sk0Fd%2FbQCALqMzzgqn9PO2yTfBZWAS0RwjCWvo9kMlMw9F2YYquUz0Yf3wiNzxTJzFTpbgL6tD3YQDujJ07VUQ%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:18:20.103-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:18:20.106-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual
+time=2025-03-22T18:18:20.111-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/
+time=2025-03-22T18:18:20.128-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter_bootstrap.js
+time=2025-03-22T18:18:20.138-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:18:20.159-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/favicon.png
+time=2025-03-22T18:18:20.159-04:00 level=ERROR msg="http: TLS handshake error from [::1]:63934: remote error: tls: unknown certificate"
+time=2025-03-22T18:18:20.162-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"
+time=2025-03-22T18:18:20.163-04:00 level=INFO msg="received request" ip=[::1]:63935 proto=HTTP/2.0 method=GET uri=/scvis/visual/manifest.json
+time=2025-03-22T18:18:20.170-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/main.dart.js
+time=2025-03-22T18:18:20.170-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/icons/Icon-192.png
+time=2025-03-22T18:18:20.233-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/FontManifest.json
+time=2025-03-22T18:18:20.237-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/fonts/MaterialIcons-Regular.otf
+time=2025-03-22T18:18:20.237-04:00 level=INFO msg="received request" ip=[::1]:63922 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf

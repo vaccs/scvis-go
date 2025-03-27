@@ -1,0 +1,36 @@
+time=2025-03-22T18:54:11.612-04:00 level=INFO msg="getting embedded build folder"
+time=2025-03-22T18:54:11.612-04:00 level=INFO msg="starting server" addr=:4000
+time=2025-03-22T18:54:19.362-04:00 level=INFO msg="received request" ip=[::1]:56394 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:54:21.620-04:00 level=INFO msg="received request" ip=[::1]:56394 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=j89zR6Honnp%2BM76AmSTYtS%2BZVxMxJB7hUVllLQqOB0D1diuoNZMCt9IfXWi%2BlINHj17Ca2Xfh81LKcgwoqTgQg%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:54:21.622-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:54:21.661-04:00 level=INFO msg="received request" ip=[::1]:56394 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:54:23.267-04:00 level=INFO msg="received request" ip=[::1]:56394 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"
+time=2025-03-22T18:54:41.043-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:54:41.990-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:54:42.006-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T18:54:42.006-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T18:54:42.006-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T18:54:42.040-04:00 level=INFO msg="received request" ip=[::1]:56495 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis_small.png
+time=2025-03-22T18:54:44.460-04:00 level=INFO msg="received request" ip=[::1]:56510 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=QG%2Fie4OE82drZ0CiQji%2F0Iy%2F6%2BIVka2rdEaWOFLuFzA61rqUF%2F9vqsdLo0pliOQiLHh%2BmkFqNIduNjsl%2BsTwMg%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:54:44.462-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:54:44.496-04:00 level=INFO msg="received request" ip=[::1]:56510 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:54:46.333-04:00 level=INFO msg="received request" ip=[::1]:56510 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"
+time=2025-03-22T18:57:37.027-04:00 level=INFO msg="received request" ip=[::1]:57316 proto=HTTP/2.0 method=GET uri="/scvis/project/analyze?id=12"
+time=2025-03-22T18:57:37.053-04:00 level=INFO msg="received request" ip=[::1]:57316 proto=HTTP/2.0 method=GET uri=/scvis/static/css/main.css
+time=2025-03-22T18:57:37.053-04:00 level=INFO msg="received request" ip=[::1]:57316 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis.png
+time=2025-03-22T18:57:37.053-04:00 level=INFO msg="received request" ip=[::1]:57316 proto=HTTP/2.0 method=GET uri=/scvis/static/js/main.js
+time=2025-03-22T18:57:37.087-04:00 level=INFO msg="received request" ip=[::1]:57316 proto=HTTP/2.0 method=GET uri=/scvis/static/img/scvis_small.png
+time=2025-03-22T18:57:39.193-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri="/scvis/project/visual?csrf_token=hS3KmP716irOSuOgEeSs%2FdJ5%2FDEd0%2FolBMP2UbEMXw%2F%2FlJJ3ao5252JmAEg2VPcPcr5pSUkoYwkes1tMGSa4DQ%3D%3D&id=12&command-params=0123"
+time=2025-03-22T18:57:39.195-04:00 level=INFO msg="Serving Flutter web application"
+time=2025-03-22T18:57:39.201-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual
+time=2025-03-22T18:57:39.205-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/
+time=2025-03-22T18:57:39.222-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter_bootstrap.js
+time=2025-03-22T18:57:39.231-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/flutter.js.map
+time=2025-03-22T18:57:39.237-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/main.dart.js
+time=2025-03-22T18:57:39.306-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/FontManifest.json
+time=2025-03-22T18:57:39.311-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/favicon.png
+time=2025-03-22T18:57:39.311-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/fonts/MaterialIcons-Regular.otf
+time=2025-03-22T18:57:39.311-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/assets/packages/cupertino_icons/assets/CupertinoIcons.ttf
+time=2025-03-22T18:57:39.311-04:00 level=INFO msg="received request" ip=[::1]:57332 proto=HTTP/2.0 method=GET uri=/scvis/visual/manifest.json
+time=2025-03-22T18:57:39.321-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri=/scvis/visual/icons/Icon-192.png
+time=2025-03-22T18:57:40.862-04:00 level=INFO msg="received request" ip=[::1]:57329 proto=HTTP/2.0 method=GET uri="/scvis/visual/flutter_service_worker.js?v=2620249119"
