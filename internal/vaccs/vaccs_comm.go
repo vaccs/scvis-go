@@ -44,7 +44,7 @@ func NewVaccsComm(logger *slog.Logger) *VaccsComm {
 func (vc *VaccsComm) Connect() error {
 	var err error
 	vc.logger.Info("Connecting to localhost:3580")
-	vc.socket, err = net.Dial("tcp", "localhost:3580")
+	vc.socket, err = net.DialTimeout("tcp", "localhost:3580", 10*time.Second)
 	if err != nil {
 		return err
 	}
