@@ -423,11 +423,6 @@ func (app *application) projectAnalyzePost(w http.ResponseWriter, r *http.Reques
 
 		vaccs_comm := vaccs.NewVaccsComm(app.logger)
 
-		if !vaccs_comm.IsPortOpen() {
-			app.serverError(w, r, errors.New("analysis is not working currently"))
-			return
-		}
-
 		err = vaccs_comm.Connect()
 		if err != nil {
 			app.serverError(w, r, err)
