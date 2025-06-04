@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>strcat Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="steve carr" >
+<meta name="date" content="2016-07-21T15:55:40-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, strcat">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+
+<h1>strcpy()</h1>
+
+<p>The C library function <code>strcat()</code> concatenates two strings (See <a href="strings.html">here</a> for a quick tutorial on C strings) from one memory location to another. The prototype for <code>strcpy</code> is</p>
+
+<p><code><b>char *strcat</b>(char *<var>dest</var>, char*<var> src</var>)</code></p>
+
+<p><code>strcat()</code> appends the string <code><var>src</var></code> to the string <code><var>dest. The null termination 
+character at the end of <code><var>dest</var></code></var></code> is overwritten with the first character of <code><var>src</var>
+</code> and a null character is added to the end of the concantenated string.</p>
+
+<p>Because <code>strcpy()</code> does not check to make sure that the concatenating the two strings does not overrun the memory 
+allocate for <code><var>dest</var></code>. Consider the following program.</p>
+
+<pre>
+static char a[4];
+static char b[4]]
+
+int main(int argc, char **argv) {
+
+  strcpy(a,"one");
+  strcpy(b,"two");
+  strcat(a,b);
+
+  printf("a = %s\n",a);
+  printf("b = %s\n",b);
+
+}
+
+ </pre></p>
+ 
+ <p>After the first call to <code>strcpy()</code> memory for <code>a</code> and <code>b</code> looks like</p>
+ 
+ <p><img src="CstrcatUnboundExample1.jpeg" width="50%" height="50%" alt=""></p>
+ 
+ <p>and after the second call to <code>strcpy()</code></p>
+ 
+ <p><img src="CstrcatUnboundExample2.jpeg" width="50%" height="50%" alt=""></p>
+ 
+ <p>However, after the call to <code>strcat()</code>, the contents of <code>a</code> overrun <code>b</code> as shown below.</p>
+ 
+ <p><img src="CstrcatUnboundExample3.jpeg" width="50%" height="50%" alt=""></p>
+ 
+ <p>Given this contents of memory, the result of the two calls to <code>printf()</code> is</p>
+ 
+ <p><pre>
+ a = onetwo
+ b = wo
+ </pre></p>
+</body>
+</html>
