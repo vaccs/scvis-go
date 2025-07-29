@@ -130,14 +130,14 @@ func main() {
 
 	if localServer {
 		err = srv.ListenAndServeTLS("./tls/localhost.pem", "./tls/localhost-key.pem")
-		if err != nil {
-			log.Println("Error starting server:", err)
-		}
 	} else {
-		err = srv.ListenAndServeTLS("/etc/ssl/private/cs.wmich.edu.chained.crt", "/etc/ssl/private/cs.wmich.edu.key")
+		err = srv.ListenAndServeTLS("/etc/letsencrypt/live/vaccs.ceas.wmich.edu/fullchain.pem", "/etc/letsencrypt/live/vaccs.ceas.wmich.edu/privkey.pem")
 	}
-	logger.Error(err.Error())
-	os.Exit(1)
+
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 }
 
 func openDB(dsn string) (*sql.DB, error) {
