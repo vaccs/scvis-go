@@ -48,10 +48,24 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 }
 
 func (app *application) newTemplateData(r *http.Request) templateData {
+	isAuthenticated := app.isAuthenticated(r)
+	isAdministrator := false
+
+	if isAuthenticated {
+		userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if userID != 0 {
+			isAdmin, err := app.users.IsAdministrator(userID)
+			if err == nil {
+				isAdministrator = isAdmin
+			}
+		}
+	}
+
 	return templateData{
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
-		IsAuthenticated: app.isAuthenticated(r),
+		IsAuthenticated: isAuthenticated,
+		IsAdministrator: isAdministrator,
 		CSRFToken:       nosurf.Token(r),
 	}
 }

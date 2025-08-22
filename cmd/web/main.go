@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"database/sql"
-	"flag"
 	"fmt"
 	"html/template"
 	"log"
@@ -33,16 +32,19 @@ type application struct {
 
 var localServer bool
 
-func init() {
-	flag.BoolVar(&localServer, "local", false, "Run server in local mode")
-}
 func main() {
-	flag.Parse()
+	// Check if /etc/scvisual/scvisual.conf is accessible to determine server mode
+	if file, err := os.Open("/etc/scvisual/scvisual.conf"); err == nil {
+		file.Close()
+		localServer = false
+	} else {
+		localServer = true
+	}
 
 	if localServer {
-		err := godotenv.Load("./scvisual.conf")
+		err := godotenv.Load("./.env")
 		if err != nil {
-			log.Fatal("Error loading ./scvisual.conf file")
+			log.Fatal("Error loading .env file")
 		}
 	} else {
 		err := godotenv.Load("/etc/scvisual/scvisual.conf")
@@ -55,9 +57,8 @@ func main() {
 	dbPasswd := os.Getenv("DB_PASSWD")
 	dbName := os.Getenv("DB_NAME")
 
-	dsn := flag.String("dsn", fmt.Sprintf("%s:%s@/%s?parseTime=true", dbUser, dbPasswd, dbName), "MySQL data source name")
-	addr := flag.String("addr", ":4000", "HTTP network address")
-	flag.Parse()
+	dsn := fmt.Sprintf("%s:%s@/%s?parseTime=true", dbUser, dbPasswd, dbName)
+	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
 
 	var logDir string
 	if localServer {
@@ -80,7 +81,7 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(logFile, nil))
 
-	db, err := openDB(*dsn)
+	db, err := openDB(dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -115,7 +116,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:         *addr,
+		Addr:         addr,
 		Handler:      app.routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		TLSConfig:    tlsConfig,

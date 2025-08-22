@@ -7,11 +7,11 @@
         <div class='error'>{{.}}</div>
     {{end}}
     <div>
-        <label>Email:</label>
-        {{with .Form.FieldErrors.email}}
+        <label>Email or Username:</label>
+        {{with .Form.FieldErrors.emailOrUsername}}
             <label class='error'>{{.}}</label>
         {{end}}
-        <input type='email' name='email' value='{{.Form.Email}}'>
+        <input type='text' name='emailOrUsername' value='{{.Form.EmailOrUsername}}'>
     </div>
     <div>
         <label>Password:</label>
