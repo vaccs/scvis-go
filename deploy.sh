@@ -32,6 +32,17 @@ fi
 echo "Building SCVISUAL application..."
 go build -o scvisual ./cmd/web
 
+# Stop the service if it's running
+echo "Stopping scvisual service if running..."
+if sudo systemctl is-active --quiet scvisual; then
+    echo "Service is running, stopping it..."
+    sudo systemctl stop scvisual
+    SERVICE_WAS_RUNNING=true
+else
+    echo "Service is not running"
+    SERVICE_WAS_RUNNING=false
+fi
+
 # Copy binary to application directory
 sudo cp scvisual /opt/scvisual/
 sudo chown www-data:www-data /opt/scvisual/scvisual
@@ -67,12 +78,21 @@ fi
 sudo cp scvisual.service /etc/systemd/system/
 sudo systemctl daemon-reload
 
+# Restart the service if it was running before
+if [ "$SERVICE_WAS_RUNNING" = true ]; then
+    echo "Restarting scvisual service..."
+    sudo systemctl start scvisual
+    echo "Service restarted!"
+fi
+
 echo "Setup complete!"
 echo ""
-echo "To start the service:"
-echo "  sudo systemctl enable scvisual"
-echo "  sudo systemctl start scvisual"
-echo ""
+if [ "$SERVICE_WAS_RUNNING" = false ]; then
+    echo "To start the service:"
+    echo "  sudo systemctl enable scvisual"
+    echo "  sudo systemctl start scvisual"
+    echo ""
+fi
 echo "To check status:"
 echo "  sudo systemctl status scvisual"
 echo ""
