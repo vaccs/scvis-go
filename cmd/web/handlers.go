@@ -226,9 +226,10 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 }
 
 type userSignupForm struct {
-	Name                string `form:"name"`
+	Username            string `form:"username"`
 	Email               string `form:"email"`
 	Password            string `form:"password"`
+	Administrator       bool   `form:"administrator"`
 	validator.Validator `form:"-"`
 }
 
@@ -247,7 +248,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form.CheckField(validator.NotBlank(form.Name), "name", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.Username), "username", "This field cannot be blank")
 	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
 	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
@@ -260,7 +261,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.users.Insert(form.Name, form.Email, form.Password)
+	err = app.users.Insert(form.Username, form.Email, form.Password, form.Administrator)
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			form.AddFieldError("email", "Email address is already in use")
@@ -275,13 +276,13 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.sessionManager.Put(r.Context(), "flash", "Your signup was successful. Please log in.")
+	app.sessionManager.Put(r.Context(), "flash", "User created successfully.")
 
-	http.Redirect(w, r, "/scvis/user/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }
 
 type userLoginForm struct {
-	Email               string `form:"email"`
+	EmailOrUsername     string `form:"emailOrUsername"`
 	Password            string `form:"password"`
 	validator.Validator `form:"-"`
 }
@@ -301,8 +302,7 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank")
-	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email address")
+	form.CheckField(validator.NotBlank(form.EmailOrUsername), "emailOrUsername", "This field cannot be blank")
 	form.CheckField(validator.NotBlank(form.Password), "password", "This field cannot be blank")
 
 	if !form.Valid() {
@@ -312,10 +312,10 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := app.users.Authenticate(form.Email, form.Password)
+	id, err := app.users.Authenticate(form.EmailOrUsername, form.Password)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredentials) {
-			form.AddNonFieldError("Email or password is incorrect")
+			form.AddNonFieldError("Email/Username or password is incorrect")
 
 			data := app.newTemplateData(r)
 			data.Form = form
@@ -582,4 +582,59 @@ func (app *application) cfileViewPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, fmt.Sprintf("/scvis/project/analyze?id=%d", project.ID), http.StatusSeeOther)
+}
+
+type userChangePasswordForm struct {
+	CurrentPassword     string `form:"currentPassword"`
+	NewPassword         string `form:"newPassword"`
+	ConfirmPassword     string `form:"confirmPassword"`
+	validator.Validator `form:"-"`
+}
+
+func (app *application) userChangePassword(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = userChangePasswordForm{}
+	app.render(w, r, http.StatusOK, "change_password.tmpl", data)
+}
+
+func (app *application) userChangePasswordPost(w http.ResponseWriter, r *http.Request) {
+	var form userChangePasswordForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.CurrentPassword), "currentPassword", "This field cannot be blank")
+	form.CheckField(validator.NotBlank(form.NewPassword), "newPassword", "This field cannot be blank")
+	form.CheckField(validator.MinChars(form.NewPassword, 8), "newPassword", "This field must be at least 8 characters long")
+	form.CheckField(validator.NotBlank(form.ConfirmPassword), "confirmPassword", "This field cannot be blank")
+	form.CheckField(form.NewPassword == form.ConfirmPassword, "confirmPassword", "Passwords do not match")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "change_password.tmpl", data)
+		return
+	}
+
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	err = app.users.ChangePassword(userID, form.CurrentPassword, form.NewPassword)
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			form.AddFieldError("currentPassword", "Current password is incorrect")
+
+			data := app.newTemplateData(r)
+			data.Form = form
+			app.render(w, r, http.StatusUnprocessableEntity, "change_password.tmpl", data)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Your password has been changed successfully.")
+
+	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
 }

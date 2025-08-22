@@ -63,6 +63,42 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 	})
 }
 
+func (app *application) requireAdministrator(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !app.isAuthenticated(r) {
+			http.Redirect(w, r, "/scvis/user/login", http.StatusSeeOther)
+			return
+		}
+
+		userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		isAdmin, err := app.users.IsAdministrator(userID)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		if !isAdmin {
+			app.clientError(w, http.StatusForbidden)
+			return
+		}
+
+		w.Header().Add("Cache-Control", "no-store")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) redirectIfAuthenticated(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if app.isAuthenticated(r) {
+			http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func noSurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 	csrfHandler.SetBaseCookie(http.Cookie{
