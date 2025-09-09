@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"scvis.vaccsedu.org/internal/models"
@@ -31,6 +32,113 @@ type application struct {
 }
 
 var localServer bool
+
+// LogRotator manages log file rotation
+type LogRotator struct {
+	logFile    *os.File
+	logPath    string
+	maxSize    int64 // Maximum size in bytes before rotation
+	maxBackups int   // Maximum number of backup files to keep
+}
+
+// NewLogRotator creates a new log rotator
+func NewLogRotator(logPath string, maxSize int64, maxBackups int) (*LogRotator, error) {
+	lr := &LogRotator{
+		logPath:    logPath,
+		maxSize:    maxSize,
+		maxBackups: maxBackups,
+	}
+
+	err := lr.openLogFile()
+	if err != nil {
+		return nil, err
+	}
+
+	return lr, nil
+}
+
+// openLogFile opens or creates the log file
+func (lr *LogRotator) openLogFile() error {
+	// Ensure directory exists
+	dir := filepath.Dir(lr.logPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(lr.logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	lr.logFile = file
+	return nil
+}
+
+// Write implements io.Writer interface with rotation logic
+func (lr *LogRotator) Write(p []byte) (n int, err error) {
+	// Check if rotation is needed
+	if lr.needsRotation() {
+		if err := lr.rotate(); err != nil {
+			return 0, err
+		}
+	}
+
+	return lr.logFile.Write(p)
+}
+
+// needsRotation checks if the log file needs to be rotated
+func (lr *LogRotator) needsRotation() bool {
+	if lr.logFile == nil {
+		return false
+	}
+
+	info, err := lr.logFile.Stat()
+	if err != nil {
+		return false
+	}
+
+	return info.Size() >= lr.maxSize
+}
+
+// rotate rotates the log file
+func (lr *LogRotator) rotate() error {
+	// Close current log file
+	if lr.logFile != nil {
+		lr.logFile.Close()
+	}
+
+	// Rotate existing backup files
+	for i := lr.maxBackups; i > 0; i-- {
+		oldPath := fmt.Sprintf("%s.%d", lr.logPath, i)
+		newPath := fmt.Sprintf("%s.%d", lr.logPath, i+1)
+
+		if i == lr.maxBackups {
+			// Remove the oldest backup
+			os.Remove(oldPath)
+		} else {
+			// Move backup file to next number
+			if _, err := os.Stat(oldPath); err == nil {
+				os.Rename(oldPath, newPath)
+			}
+		}
+	}
+
+	// Move current log to .1 backup
+	if _, err := os.Stat(lr.logPath); err == nil {
+		os.Rename(lr.logPath, lr.logPath+".1")
+	}
+
+	// Create new log file
+	return lr.openLogFile()
+}
+
+// Close closes the log file
+func (lr *LogRotator) Close() error {
+	if lr.logFile != nil {
+		return lr.logFile.Close()
+	}
+	return nil
+}
 
 func main() {
 	// Check if /etc/scvisual/scvisual.conf is accessible to determine server mode
@@ -66,20 +174,26 @@ func main() {
 	} else {
 		logDir = "/var/log/scvisual"
 	}
-	if _, err := os.Stat(logDir); os.IsNotExist(err) {
-		err = os.MkdirAll(logDir, 0755)
-		if err != nil {
-			log.Fatalf("Failed to create log directory: %v", err)
-		}
+
+	logPath := filepath.Join(logDir, "scvisual.log")
+
+	// Get log rotation settings from environment, with defaults
+	maxSizeMB := 10 // Default 10MB
+	maxBackups := 5 // Default 5 backup files
+
+	// For development/testing, allow smaller log files
+	if localServer {
+		maxSizeMB = 1 // 1MB for local development
 	}
 
-	logFile, err := os.CreateTemp(logDir, "scvisual-*.log")
+	// Create log rotator
+	logRotator, err := NewLogRotator(logPath, int64(maxSizeMB)*1024*1024, maxBackups)
 	if err != nil {
-		log.Fatalf("Failed to create log file: %v", err)
+		log.Fatalf("Failed to create log rotator: %v", err)
 	}
-	defer logFile.Close()
+	defer logRotator.Close()
 
-	logger := slog.New(slog.NewTextHandler(logFile, nil))
+	logger := slog.New(slog.NewTextHandler(logRotator, nil))
 
 	db, err := openDB(dsn)
 	if err != nil {
