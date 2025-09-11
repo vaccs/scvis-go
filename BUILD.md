@@ -1,8 +1,84 @@
-# SCVis Build Scripts
+# SCVis Build and Database Scripts
 
-This directory contains build scripts for the SCVis application, which combines a Flutter web frontend with a Go backend.
+This directory contains build scripts for the SCVis application, which combines a Flutter web frontend with a Go backend, plus database installation and verification tools.
 
-## Available Build Scripts
+## Quick Start
+
+For a complete setup from scratch:
+
+```bash
+# 1. Set up the database
+./install_database.sh
+
+# 2. Verify everything is working
+./verify_installation.sh
+
+# 3. Build and run the application
+./quick-build.sh
+```
+
+## Database Scripts
+
+### `install_database.sh` (Database Setup)
+
+Automated database installation script that sets up MySQL databases, users, and tables.
+
+**What it does:**
+1. Checks MySQL installation and service status
+2. Creates production (`scvis`) and development (`scvis_local`) databases
+3. Creates database user with appropriate permissions
+4. Creates all required tables with proper relationships
+5. Optionally creates a sample admin user
+6. Generates configuration files
+
+**Usage:**
+```bash
+./install_database.sh
+```
+
+**Features:**
+- Interactive configuration prompts
+- Automatic MySQL service detection
+- Secure password handling
+- Configuration file generation
+- Comprehensive error handling
+- Detailed progress reporting
+
+### `validate_database.sh` (Database Validation)
+
+Validates that the database is properly configured and accessible.
+
+**What it does:**
+1. Tests database connectivity
+2. Verifies table existence and structure
+3. Checks foreign key constraints
+4. Tests application integration
+5. Provides detailed status report
+
+**Usage:**
+```bash
+./validate_database.sh
+```
+
+### `verify_installation.sh` (Complete System Check)
+
+Comprehensive verification script that checks all system components.
+
+**What it does:**
+1. Verifies system dependencies (Go, MySQL)
+2. Checks project structure and files
+3. Validates Go dependencies
+4. Tests database configuration
+5. Verifies build capability
+6. Checks configuration files and certificates
+7. Provides recommendations for fixes
+
+**Usage:**
+```bash
+./verify_installation.sh
+```
+
+## Build Scripts
 
 ### 1. `build.sh` (Comprehensive Build)
 
@@ -82,31 +158,58 @@ scvis-go/                    # This project
     └── build/web/          # Flutter build output
 ```
 
-## Usage Examples
+## Complete Setup Workflow
+
+### First-Time Setup
+```bash
+# 1. Install system dependencies (Ubuntu/Debian)
+sudo apt update
+sudo apt install mysql-server golang-go
+
+# 2. Set up the database
+./install_database.sh
+
+# 3. Verify installation
+./verify_installation.sh
+
+# 4. Build the application
+./build.sh
+
+# 5. Run in development mode
+go run ./cmd/web
+```
 
 ### Development Workflow
 ```bash
+# Check if everything is ready
+./verify_installation.sh
+
 # Quick build during development
 ./quick-build.sh
 
 # Test the application
 ./scvisual
 
-# Or deploy to production
-sudo ./deploy.sh
+# Or run directly
+go run ./cmd/web
 ```
 
-### Production Build
+### Production Deployment
 ```bash
-# Comprehensive build with verification
+# 1. Verify system is ready
+./verify_installation.sh
+
+# 2. Comprehensive build with verification
 ./build.sh
 
-# Deploy the built application
+# 3. Deploy the built application
 sudo ./deploy.sh
 
-# Check deployment status
+# 4. Check deployment status
 sudo systemctl status scvisual
 ```
+
+## Usage Examples
 
 ### Build Only Go (Skip Flutter)
 ```bash
