@@ -110,6 +110,90 @@ scvis-go/
 - **Let's Encrypt** - SSL/TLS certificates
 - **Nginx** - Reverse proxy (optional)
 
+## Configuration
+
+SCVis uses environment variables for configuration. The application loads configuration from:
+- Development: `.env` file in the project root
+- Production: `/opt/scvis/.env`
+
+### Available Configuration Options
+
+#### Database Configuration
+- `DB_HOST` - Database hostname (default: `localhost`)
+- `DB_USER` - Database username (required)
+- `DB_PASSWD` - Database password (required)
+- `DB_NAME` - Database name (required)
+- `PORT` - Application port (default: `4000`)
+
+#### Server Mode Configuration
+- `LOCAL_SERVER` - Server mode setting
+  - `true` - Development/local server mode (uses development defaults)
+  - `false` - Production server mode (uses production defaults)
+  - If not set, auto-detected based on file structure
+
+#### Log Configuration
+- `LOG_DIR` - Log directory path
+  - Development default: `./log/scvisual`
+  - Production default: `/var/log/scvisual`
+- `LOG_MAX_SIZE_MB` - Maximum log file size in MB before rotation
+  - Development default: `1`
+  - Production default: `10`
+- `LOG_MAX_BACKUPS` - Number of backup log files to keep (default: `5`)
+
+#### SSL Certificate Configuration
+- `SSL_CERT_PATH` - Path to SSL certificate file
+  - Development default: `./tls/localhost.pem`
+  - Production default: `/etc/letsencrypt/live/vaccs.ceas.wmich.edu/fullchain.pem`
+- `SSL_KEY_PATH` - Path to SSL private key file
+  - Development default: `./tls/localhost-key.pem`
+  - Production default: `/etc/letsencrypt/live/vaccs.ceas.wmich.edu/privkey.pem`
+
+### Configuration Examples
+
+#### Development (`.env`)
+```bash
+# Database Configuration
+DB_HOST=localhost
+DB_USER=scvis
+DB_PASSWD=dev_password
+DB_NAME=scvis_local
+PORT=4000
+
+# Server Mode Configuration
+LOCAL_SERVER=true
+
+# Log Configuration
+LOG_DIR=./log/scvisual
+LOG_MAX_SIZE_MB=1
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=./tls/localhost.pem
+SSL_KEY_PATH=./tls/localhost-key.pem
+```
+
+#### Production (`/opt/scvis/.env`)
+```bash
+# Database Configuration
+DB_HOST=localhost
+DB_USER=scvis
+DB_PASSWD=secure_production_password
+DB_NAME=scvis
+PORT=4000
+
+# Server Mode Configuration
+LOCAL_SERVER=false
+
+# Log Configuration
+LOG_DIR=/var/log/scvisual
+LOG_MAX_SIZE_MB=10
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=/etc/letsencrypt/live/your-domain.com/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/your-domain.com/privkey.pem
+```
+
 ## Development Setup
 
 ### Prerequisites
@@ -134,11 +218,21 @@ sudo apt install mysql-server mysql-client
 
 2. **Environment Variables** (`.env`):
    ```bash
+   # Database Configuration
    DB_HOST=localhost
    DB_USER=scvis
    DB_PASSWD=your_password
    DB_NAME=scvis_local
    PORT=4000
+   
+   # Log Configuration
+   LOG_DIR=./log/scvisual
+   LOG_MAX_SIZE_MB=1
+   LOG_MAX_BACKUPS=5
+   
+   # SSL Certificate Configuration
+   SSL_CERT_PATH=./tls/localhost.pem
+   SSL_KEY_PATH=./tls/localhost-key.pem
    ```
 
 3. **Development Certificates**:
@@ -186,10 +280,10 @@ cd /opt/scvis
 ./build.sh
 
 # Configure production environment
-sudo mkdir -p /etc/scvisual
-sudo cp scvisual.conf.example /etc/scvisual/scvisual.conf
-sudo chown root:www-data /etc/scvisual/scvisual.conf
-sudo chmod 640 /etc/scvisual/scvisual.conf
+sudo mkdir -p /opt/scvis
+sudo cp production.env /opt/scvis/.env
+sudo chown root:www-data /opt/scvis/.env
+sudo chmod 640 /opt/scvis/.env
 ```
 
 ### 3. Install as System Service

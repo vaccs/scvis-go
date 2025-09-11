@@ -23,9 +23,9 @@ sudo chmod 750 /etc/scvisual
 
 # Copy configuration file if it exists
 if [ -f "./.env" ]; then
-    sudo cp ./.env /etc/scvisual/
-    sudo chown root:www-data /etc/scvisual/.env
-    sudo chmod 640 /etc/scvisual/.env
+    sudo cp ./.env /opt/scvisual/
+    sudo chown root:www-data /opt/scvisual/.env
+    sudo chmod 600 /opt/scvisual/.env
 fi
 
 # Build the application

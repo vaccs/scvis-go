@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"scvis.vaccsedu.org/internal/models"
@@ -141,24 +142,35 @@ func (lr *LogRotator) Close() error {
 }
 
 func main() {
-	// Check if /etc/scvisual/scvisual.conf is accessible to determine server mode
-	if file, err := os.Open("/etc/scvisual/scvisual.conf"); err == nil {
-		file.Close()
-		localServer = false
+	// Determine server mode from LOCAL_SERVER environment variable or fallback to file check
+	localServerEnv := os.Getenv("LOCAL_SERVER")
+	if localServerEnv != "" {
+		// Explicit configuration via environment variable
+		localServer = localServerEnv == "true"
 	} else {
-		localServer = true
+		// Fallback: Check if running in installation directory vs development directory
+		if _, err := os.Stat("./scvis-go"); err == nil {
+			// Development directory (contains scvis-go executable/source)
+			localServer = true
+		} else if _, err := os.Stat("/opt/scvisual/.env"); err == nil {
+			// Production installation directory
+			localServer = false
+		} else {
+			// Default to local server mode for backwards compatibility
+			localServer = true
+		}
 	}
 
+	var envPath string
 	if localServer {
-		err := godotenv.Load("./.env")
-		if err != nil {
-			log.Fatal("Error loading .env file")
-		}
+		envPath = "./.env"
 	} else {
-		err := godotenv.Load("/etc/scvisual/scvisual.conf")
-		if err != nil {
-			log.Fatal("Error loading /etc/scvisual/scvisual.conf file")
-		}
+		envPath = "/opt/scvisual/.env"
+	}
+
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Fatalf("Error loading environment file: %s", envPath)
 	}
 
 	dbUser := os.Getenv("DB_USER")
@@ -168,22 +180,44 @@ func main() {
 	dsn := fmt.Sprintf("%s:%s@/%s?parseTime=true", dbUser, dbPasswd, dbName)
 	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
 
-	var logDir string
-	if localServer {
-		logDir = "./log/scvisual"
-	} else {
-		logDir = "/var/log/scvisual"
+	// Get log directory from environment variable, with fallback logic
+	logDir := os.Getenv("LOG_DIR")
+	if logDir == "" {
+		if localServer {
+			logDir = "./log/scvisual"
+		} else {
+			logDir = "/var/log/scvisual"
+		}
 	}
 
 	logPath := filepath.Join(logDir, "scvisual.log")
 
-	// Get log rotation settings from environment, with defaults
+	// Get log rotation settings from environment variables, with defaults
 	maxSizeMB := 10 // Default 10MB
 	maxBackups := 5 // Default 5 backup files
 
-	// For development/testing, allow smaller log files
-	if localServer {
-		maxSizeMB = 1 // 1MB for local development
+	// Read from environment variables if set
+	if envMaxSize := os.Getenv("LOG_MAX_SIZE_MB"); envMaxSize != "" {
+		if size, err := strconv.Atoi(envMaxSize); err == nil {
+			maxSizeMB = size
+		} else {
+			logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+			logger.Warn("Invalid LOG_MAX_SIZE_MB value, using default", "value", envMaxSize, "default", maxSizeMB)
+		}
+	}
+
+	if envMaxBackups := os.Getenv("LOG_MAX_BACKUPS"); envMaxBackups != "" {
+		if backups, err := strconv.Atoi(envMaxBackups); err == nil {
+			maxBackups = backups
+		} else {
+			logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+			logger.Warn("Invalid LOG_MAX_BACKUPS value, using default", "value", envMaxBackups, "default", maxBackups)
+		}
+	}
+
+	// For development/testing, use configured values or smaller defaults
+	if localServer && os.Getenv("LOG_MAX_SIZE_MB") == "" {
+		maxSizeMB = 1 // 1MB for local development if not explicitly set
 	}
 
 	// Create log rotator
@@ -243,11 +277,27 @@ func main() {
 	logger.Info("starting server", "addr", srv.Addr)
 	log.Println("Initializing application")
 
-	if localServer {
-		err = srv.ListenAndServeTLS("./tls/localhost.pem", "./tls/localhost-key.pem")
+	// Get SSL certificate paths from environment variables, with fallback logic
+	var certPath, keyPath string
+
+	if envCertPath := os.Getenv("SSL_CERT_PATH"); envCertPath != "" {
+		certPath = envCertPath
+	} else if localServer {
+		certPath = "./tls/localhost.pem"
 	} else {
-		err = srv.ListenAndServeTLS("/etc/letsencrypt/live/vaccs.ceas.wmich.edu/fullchain.pem", "/etc/letsencrypt/live/vaccs.ceas.wmich.edu/privkey.pem")
+		certPath = "/etc/letsencrypt/live/vaccs.ceas.wmich.edu/fullchain.pem"
 	}
+
+	if envKeyPath := os.Getenv("SSL_KEY_PATH"); envKeyPath != "" {
+		keyPath = envKeyPath
+	} else if localServer {
+		keyPath = "./tls/localhost-key.pem"
+	} else {
+		keyPath = "/etc/letsencrypt/live/vaccs.ceas.wmich.edu/privkey.pem"
+	}
+
+	logger.Info("using SSL certificates", "cert", certPath, "key", keyPath)
+	err = srv.ListenAndServeTLS(certPath, keyPath)
 
 	if err != nil {
 		logger.Error(err.Error())
