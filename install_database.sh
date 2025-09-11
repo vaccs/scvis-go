@@ -66,25 +66,16 @@ get_mysql_credentials() {
     read -p "MySQL root username [root]: " MYSQL_ROOT_USER
     MYSQL_ROOT_USER=${MYSQL_ROOT_USER:-root}
     
-    read -s -p "MySQL root password: " MYSQL_ROOT_PASSWORD
     echo ""
-    
-    if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-        print_warning "Empty password provided. Attempting connection without password..."
-    fi
+    print_info "You will be prompted for the MySQL root password during operations"
 }
 
 # Test MySQL connection
 test_mysql_connection() {
     print_info "Testing MySQL connection..."
+    print_info "Please enter MySQL root password when prompted:"
     
-    if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-        MYSQL_CMD="mysql -u $MYSQL_ROOT_USER"
-    else
-        MYSQL_CMD="mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD"
-    fi
-    
-    if ! echo "SELECT 1;" | $MYSQL_CMD &> /dev/null; then
+    if ! echo "SELECT 1;" | mysql -u "$MYSQL_ROOT_USER" -p; then
         print_error "Failed to connect to MySQL. Please check your credentials."
         exit 1
     fi
@@ -126,8 +117,9 @@ get_database_config() {
 # Create databases and user
 create_databases() {
     print_info "Creating databases and user..."
+    print_info "Please enter MySQL root password when prompted:"
     
-    cat << EOF | $MYSQL_CMD
+    mysql -u "$MYSQL_ROOT_USER" -p << EOF
 -- Create databases
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 CREATE DATABASE IF NOT EXISTS \`$DB_LOCAL_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
@@ -150,15 +142,9 @@ EOF
 create_tables() {
     local database=$1
     print_info "Creating tables in database: $database"
+    print_info "Please enter password for user '$DB_USER' when prompted:"
     
-    # Use the created database user to create tables
-    if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-        DB_MYSQL_CMD="mysql -u $DB_USER -p$DB_PASSWD $database"
-    else
-        DB_MYSQL_CMD="mysql -u $DB_USER -p$DB_PASSWD $database"
-    fi
-    
-    cat << 'EOF' | $DB_MYSQL_CMD
+    mysql -u "$DB_USER" -p "$database" << 'EOF'
 -- Create users table
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -245,7 +231,8 @@ create_sample_user() {
             print_warning "Default password set to 'admin123'. Please change it after first login."
         fi
         
-        cat << EOF | mysql -u $DB_USER -p$DB_PASSWD $database
+        print_info "Please enter password for user '$DB_USER' when prompted:"
+        mysql -u "$DB_USER" -p "$database" << EOF
 INSERT IGNORE INTO users (name, email, hashed_password, administrator) 
 VALUES ('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$HASHED_PASSWORD', true);
 EOF
@@ -334,10 +321,11 @@ EOF
 # Verify installation
 verify_installation() {
     print_info "Verifying installation..."
+    print_info "Please enter password for user '$DB_USER' when prompted for verification:"
     
     # Test database connections
     for db in "$DB_NAME" "$DB_LOCAL_NAME"; do
-        if echo "SELECT COUNT(*) FROM users;" | mysql -u $DB_USER -p$DB_PASSWD $db &> /dev/null; then
+        if echo "SELECT COUNT(*) FROM users;" | mysql -u "$DB_USER" -p "$db" &> /dev/null; then
             print_status "Database $db is accessible and functional"
         else
             print_error "Failed to verify database $db"
@@ -345,7 +333,7 @@ verify_installation() {
     done
     
     # Test table creation
-    table_count=$(echo "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB_LOCAL_NAME';" | mysql -u $DB_USER -p$DB_PASSWD -s 2>/dev/null || echo "0")
+    table_count=$(echo "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$DB_LOCAL_NAME';" | mysql -u "$DB_USER" -p -s 2>/dev/null || echo "0")
     
     if [ "$table_count" -ge "4" ]; then
         print_status "All required tables created successfully"
@@ -376,6 +364,12 @@ main() {
     echo "• Create all required tables with proper relationships"
     echo "• Optionally create a sample admin user"
     echo "• Generate configuration files"
+    echo ""
+    print_warning "Password Security Note:"
+    echo "This script will prompt for passwords interactively (not on command line)"
+    echo "You will be asked for:"
+    echo "  1. MySQL root password (multiple times for different operations)"
+    echo "  2. New database user password (for verification steps)"
     echo ""
     
     read -p "Continue with installation? [Y/n]: " CONTINUE

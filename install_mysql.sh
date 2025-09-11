@@ -42,11 +42,72 @@ fi
 
 # Function to generate a secure password
 generate_password() {
-    openssl rand -base64 16 | tr -d "=+/" | cut -c1-16
+    # Generate password with safe characters (avoiding shell/SQL special chars)
+    openssl rand -base64 24 | tr -d "=+/'\"\\\$\`" | cut -c1-16
 }
 
-# Check if MySQL is already installed
-check_mysql_installed() {
+# Function to validate password for potential issues
+validate_password() {
+    local password="$1"
+    local warnings=()
+    
+    # Check for potentially problematic characters
+    if [[ "$password" == *"'"* ]]; then
+        warnings+=("Contains single quotes - will be escaped")
+    fi
+    
+    if [[ "$password" == *"\\"* ]]; then
+        warnings+=("Contains backslashes - may cause issues")
+    fi
+    
+    if [[ "$password" == *"\$"* ]]; then
+        warnings+=("Contains dollar signs - may cause shell expansion")
+    fi
+    
+    if [[ "$password" == *"\`"* ]]; then
+        warnings+=("Contains backticks - may cause command substitution")
+    fi
+    
+    if [[ "$password" == *'"'* ]]; then
+        warnings+=("Contains double quotes - may cause issues")
+    fi
+    
+    # Display warnings if any
+    if [ ${#warnings[@]} -gt 0 ]; then
+        print_warning "Password contains special characters:"
+        for warning in "${warnings[@]}"; do
+            echo "  ⚠️  $warning"
+        done
+        echo ""
+        read -p "Continue with this password? [y/N]: " continue_choice
+        if [[ ! $continue_choice =~ ^[Yy]$ ]]; then
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+
+# Function to escape password for MySQL
+escape_mysql_password() {
+    local password="$1"
+    # Escape single quotes by replacing ' with \'
+    echo "${password//\'/\\\'}"
+}
+
+# Function to safely execute MySQL command with password
+mysql_exec() {
+    local user="$1"
+    local password="$2"
+    local command="$3"
+    
+    if [ -z "$password" ]; then
+        mysql -u "$user" -e "$command"
+    else
+        # Use environment variable to pass password safely
+        MYSQL_PWD="$password" mysql -u "$user" -e "$command"
+    fi
+}
     if dpkg -l | grep -q mysql-server; then
         print_warning "MySQL server is already installed"
         if systemctl is-active --quiet mysql; then
@@ -56,7 +117,7 @@ check_mysql_installed() {
         fi
         
         # Test if root password is set
-        if mysql -u root -e "SELECT 1;" &>/dev/null; then
+        if mysql_exec "root" "" "SELECT 1;" &>/dev/null; then
             print_warning "MySQL root has no password set"
             return 1
         else
@@ -117,22 +178,31 @@ setup_root_password() {
             ;;
         2)
             echo ""
-            echo -n "Enter new root password: "
-            read -s MYSQL_ROOT_PASSWORD
-            echo ""
-            echo -n "Confirm password: "
-            read -s CONFIRM_PASSWORD
-            echo ""
-            
-            if [ "$MYSQL_ROOT_PASSWORD" != "$CONFIRM_PASSWORD" ]; then
-                print_error "Passwords do not match"
-                exit 1
-            fi
-            
-            if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-                print_error "Password cannot be empty"
-                exit 1
-            fi
+            while true; do
+                echo -n "Enter new root password: "
+                read -s MYSQL_ROOT_PASSWORD
+                echo ""
+                echo -n "Confirm password: "
+                read -s CONFIRM_PASSWORD
+                echo ""
+                
+                if [ "$MYSQL_ROOT_PASSWORD" != "$CONFIRM_PASSWORD" ]; then
+                    print_error "Passwords do not match. Please try again."
+                    continue
+                fi
+                
+                if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+                    print_error "Password cannot be empty. Please try again."
+                    continue
+                fi
+                
+                # Validate password for special characters
+                if validate_password "$MYSQL_ROOT_PASSWORD"; then
+                    break
+                else
+                    print_warning "Please choose a different password or continue with warnings."
+                fi
+            done
             ;;
         3)
             MYSQL_ROOT_PASSWORD="mysql123"
@@ -148,9 +218,12 @@ setup_root_password() {
     echo ""
     print_info "Setting MySQL root password..."
     
-    # Set the root password
-    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+    # Escape password for safe MySQL usage
+    ESCAPED_PASSWORD=$(escape_mysql_password "$MYSQL_ROOT_PASSWORD")
+    
+    # Set the root password using safe method
+    mysql_exec "root" "" "ALTER USER 'root'@'localhost' IDENTIFIED BY '$ESCAPED_PASSWORD';"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "FLUSH PRIVILEGES;"
     
     print_status "MySQL root password set successfully"
     
@@ -165,17 +238,17 @@ secure_mysql() {
     print_info "Securing MySQL installation..."
     
     # Remove anonymous users
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "DELETE FROM mysql.user WHERE User='';"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "DELETE FROM mysql.user WHERE User='';"
     
     # Disable remote root login
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
     
     # Remove test database
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS test;"
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "DROP DATABASE IF EXISTS test;"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
     
     # Reload privilege tables
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+    mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "FLUSH PRIVILEGES;"
     
     print_status "MySQL installation secured"
 }
@@ -185,8 +258,8 @@ test_mysql() {
     print_info "Testing MySQL installation..."
     
     # Test root connection
-    if mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT VERSION();" &>/dev/null; then
-        MYSQL_VERSION=$(mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT VERSION();" -s -N)
+    if mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "SELECT VERSION();" &>/dev/null; then
+        MYSQL_VERSION=$(MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root -e "SELECT VERSION();" -s -N)
         print_status "MySQL connection successful - Version: $MYSQL_VERSION"
     else
         print_error "Failed to connect to MySQL"
@@ -214,11 +287,14 @@ create_scvis_user() {
         # Generate password for SCVis user
         SCVIS_PASSWORD=$(generate_password)
         
-        # Create databases and user
-        mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF
+        # Escape passwords for MySQL
+        ESCAPED_SCVIS_PASSWORD=$(escape_mysql_password "$SCVIS_PASSWORD")
+        
+        # Create databases and user using safe method
+        MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root << EOF
 CREATE DATABASE IF NOT EXISTS scvis;
 CREATE DATABASE IF NOT EXISTS scvis_local;
-CREATE USER IF NOT EXISTS 'scvis'@'localhost' IDENTIFIED BY '$SCVIS_PASSWORD';
+CREATE USER IF NOT EXISTS 'scvis'@'localhost' IDENTIFIED BY '$ESCAPED_SCVIS_PASSWORD';
 GRANT ALL PRIVILEGES ON scvis.* TO 'scvis'@'localhost';
 GRANT ALL PRIVILEGES ON scvis_local.* TO 'scvis'@'localhost';
 FLUSH PRIVILEGES;
@@ -268,7 +344,7 @@ display_summary() {
     echo "================================================================="
     echo ""
     echo "Installation Summary:"
-    echo "  MySQL Version: $(mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT VERSION();" -s -N)"
+    echo "  MySQL Version: $(MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -u root -e "SELECT VERSION();" -s -N)"
     echo "  Root Password: Saved to /root/.mysql_root_password"
     if [ -f "/root/.scvis_db_password" ]; then
         echo "  SCVis User: scvis"
@@ -320,7 +396,7 @@ main() {
     start_mysql_service
     
     # Set up root password if not already set
-    if mysql -u root -e "SELECT 1;" &>/dev/null; then
+    if mysql_exec "root" "" "SELECT 1;" &>/dev/null; then
         setup_root_password
         secure_mysql
     else
@@ -329,7 +405,7 @@ main() {
         read -s MYSQL_ROOT_PASSWORD
         echo ""
         
-        if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1;" &>/dev/null; then
+        if ! mysql_exec "root" "$MYSQL_ROOT_PASSWORD" "SELECT 1;" &>/dev/null; then
             print_error "Invalid password"
             exit 1
         fi
