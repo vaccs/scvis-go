@@ -277,31 +277,57 @@ DB_USER=$DB_USER
 DB_PASSWD=$DB_PASSWD
 DB_NAME=$DB_LOCAL_NAME
 PORT=$APP_PORT
+
+# Development/Local Server Mode
+LOCAL_SERVER=true
+
+# Log Configuration
+LOG_DIR=./log/scvisual
+LOG_MAX_SIZE_MB=1
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=./tls/localhost.pem
+SSL_KEY_PATH=./tls/localhost-key.pem
 EOF
         
-        # Create production config template
-        cat > scvisual.conf.example << EOF
+        # Create production .env template
+        cat > production.env << EOF
 # SCVis Production Configuration
-# Copy this file to /etc/scvisual/scvisual.conf and update as needed
+# Copy this file to /opt/scvis/.env for production deployment
 
 DB_HOST=$DB_HOST
 DB_USER=$DB_USER
 DB_PASSWD=$DB_PASSWD
 DB_NAME=$DB_NAME
 PORT=$APP_PORT
+
+# Production Server Mode
+LOCAL_SERVER=false
+
+# Log Configuration
+LOG_DIR=/var/log/scvisual
+LOG_MAX_SIZE_MB=10
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=/etc/letsencrypt/live/vaccs.ceas.wmich.edu/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/vaccs.ceas.wmich.edu/privkey.pem
 EOF
         
-        chmod 600 .env scvisual.conf.example
+        chmod 600 .env production.env
         
         print_status "Configuration files created:"
         echo "  .env (development) - using database: $DB_LOCAL_NAME"
-        echo "  scvisual.conf.example (production template) - using database: $DB_NAME"
+        echo "  production.env (production template) - using database: $DB_NAME"
         echo ""
         print_warning "For production deployment:"
-        echo "  sudo mkdir -p /etc/scvisual"
-        echo "  sudo cp scvisual.conf.example /etc/scvisual/scvisual.conf"
-        echo "  sudo chown root:www-data /etc/scvisual/scvisual.conf"
-        echo "  sudo chmod 640 /etc/scvisual/scvisual.conf"
+        echo "  sudo mkdir -p /opt/scvis"
+        echo "  sudo cp production.env /opt/scvis/.env"
+        echo "  sudo chown root:www-data /opt/scvis/.env"
+        echo "  sudo chmod 640 /opt/scvis/.env"
+        echo ""
+        print_info "Legacy /etc/scvisual/scvisual.conf is no longer used"
     fi
 }
 
@@ -390,7 +416,7 @@ main() {
     echo ""
     echo "Next Steps:"
     echo "1. Test the application with: go run ./cmd/web"
-    echo "2. For production, copy scvisual.conf.example to /etc/scvisual/scvisual.conf"
+    echo "2. For production, copy production.env to /opt/scvis/.env"
     echo "3. Build and deploy the application using the build scripts"
     echo ""
     echo "For additional users, run:"

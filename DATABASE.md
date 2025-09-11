@@ -178,28 +178,49 @@ DB_USER=scvis
 DB_PASSWD=your_secure_password
 DB_NAME=scvis_local
 PORT=4000
+
+# Log Configuration
+LOG_DIR=./log/scvisual
+LOG_MAX_SIZE_MB=1
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=./tls/localhost.pem
+SSL_KEY_PATH=./tls/localhost-key.pem
 ```
 
 ### Production Configuration
 
-For production deployment, create `/etc/scvisual/scvisual.conf`:
+For production deployment, create `/opt/scvis/.env`:
 
 ```bash
 # Create directory
-sudo mkdir -p /etc/scvisual
+sudo mkdir -p /opt/scvis
 
 # Create configuration file
-sudo tee /etc/scvisual/scvisual.conf << EOF
+sudo tee /opt/scvis/.env << EOF
 DB_HOST=localhost
 DB_USER=scvis
 DB_PASSWD=your_secure_password
 DB_NAME=scvis
 PORT=4000
+
+# Server Mode Configuration
+LOCAL_SERVER=false
+
+# Log Configuration
+LOG_DIR=/var/log/scvisual
+LOG_MAX_SIZE_MB=10
+LOG_MAX_BACKUPS=5
+
+# SSL Certificate Configuration
+SSL_CERT_PATH=/etc/letsencrypt/live/your-domain.com/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/your-domain.com/privkey.pem
 EOF
 
 # Set proper permissions
-sudo chown root:www-data /etc/scvisual/scvisual.conf
-sudo chmod 640 /etc/scvisual/scvisual.conf
+sudo chown root:www-data /opt/scvis/.env
+sudo chmod 640 /opt/scvis/.env
 ```
 
 ## User Management
