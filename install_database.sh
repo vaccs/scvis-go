@@ -152,6 +152,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(255) NOT NULL,
   `hashed_password` char(60) NOT NULL,
   `administrator` boolean NOT NULL DEFAULT false,
+  `logged_in` boolean NOT NULL DEFAULT false,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_uc_email` (`email`)
@@ -175,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
 CREATE TABLE IF NOT EXISTS `cfiles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `filename` varchar(255) NOT NULL,
-  `content` text NOT NULL,
+  `csource` text NOT NULL,
   `projectid` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
