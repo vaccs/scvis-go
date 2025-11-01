@@ -1,0 +1,132 @@
+{{define "title"}}Submit Issue{{end}}
+
+{{define "main"}}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h2>Submit Issue</h2>
+            
+            {{if .GitHubConfigured}}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Issues can be submitted directly to GitHub repository: <strong>{{.GitHubRepo}}</strong>
+                </div>
+            {{else}}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    GitHub integration is not configured. Issues will be stored locally only.
+                </div>
+            {{end}}
+
+            <form action="/scvis/issue/create" method="POST">
+                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title *</label>
+                    <input type="text" class="form-control {{with .Form.FieldErrors.title}}is-invalid{{end}}" 
+                           id="title" name="title" value="{{.Form.Title}}" maxlength="200" required>
+                    {{with .Form.FieldErrors.title}}
+                        <div class="invalid-feedback">{{.}}</div>
+                    {{end}}
+                </div>
+
+                <div class="mb-3">
+                    <label for="issueType" class="form-label">Issue Type *</label>
+                    <select class="form-select {{with .Form.FieldErrors.issueType}}is-invalid{{end}}" 
+                            id="issueType" name="issueType" required>
+                        <option value="">Select issue type...</option>
+                        <option value="bug" {{if eq .Form.IssueType "bug"}}selected{{end}}>🐛 Bug Report</option>
+                        <option value="feature" {{if eq .Form.IssueType "feature"}}selected{{end}}>✨ Feature Request</option>
+                        <option value="enhancement" {{if eq .Form.IssueType "enhancement"}}selected{{end}}>🚀 Enhancement</option>
+                        <option value="documentation" {{if eq .Form.IssueType "documentation"}}selected{{end}}>📚 Documentation</option>
+                        <option value="question" {{if eq .Form.IssueType "question"}}selected{{end}}>❓ Question</option>
+                    </select>
+                    {{with .Form.FieldErrors.issueType}}
+                        <div class="invalid-feedback">{{.}}</div>
+                    {{end}}
+                </div>
+
+                <div class="mb-3">
+                    <label for="priority" class="form-label">Priority *</label>
+                    <select class="form-select {{with .Form.FieldErrors.priority}}is-invalid{{end}}" 
+                            id="priority" name="priority" required>
+                        <option value="">Select priority...</option>
+                        <option value="low" {{if eq .Form.Priority "low"}}selected{{end}}>🟢 Low</option>
+                        <option value="medium" {{if eq .Form.Priority "medium"}}selected{{end}}>🟡 Medium</option>
+                        <option value="high" {{if eq .Form.Priority "high"}}selected{{end}}>🟠 High</option>
+                        <option value="critical" {{if eq .Form.Priority "critical"}}selected{{end}}>🔴 Critical</option>
+                    </select>
+                    {{with .Form.FieldErrors.priority}}
+                        <div class="invalid-feedback">{{.}}</div>
+                    {{end}}
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control {{with .Form.FieldErrors.description}}is-invalid{{end}}" 
+                              id="description" name="description" rows="8" maxlength="2000" required 
+                              placeholder="Please provide a detailed description of the issue...">{{.Form.Description}}</textarea>
+                    {{with .Form.FieldErrors.description}}
+                        <div class="invalid-feedback">{{.}}</div>
+                    {{end}}
+                    <div class="form-text">Maximum 2000 characters</div>
+                </div>
+
+                {{if .GitHubConfigured}}
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="submitToGitHub" name="submitToGitHub" 
+                               value="true" {{if .Form.SubmitToGitHub}}checked{{end}}>
+                        <label class="form-check-label" for="submitToGitHub">
+                            <i class="fab fa-github"></i> Submit to GitHub repository
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        When checked, this issue will be automatically created in the GitHub repository: {{.GitHubRepo}}
+                    </div>
+                </div>
+                {{end}}
+
+                {{with .Form.NonFieldErrors}}
+                    <div class="alert alert-danger">
+                        {{range .}}
+                            <div>{{.}}</div>
+                        {{end}}
+                    </div>
+                {{end}}
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="/scvis/issue/list" class="btn btn-secondary me-md-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Issue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Character counter for description
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('description');
+    const maxLength = 2000;
+    
+    function updateCounter() {
+        const remaining = maxLength - textarea.value.length;
+        const counterElement = textarea.nextElementSibling.nextElementSibling;
+        if (counterElement && counterElement.classList.contains('form-text')) {
+            counterElement.textContent = `${remaining} characters remaining`;
+            if (remaining < 100) {
+                counterElement.style.color = '#dc3545';
+            } else {
+                counterElement.style.color = '';
+            }
+        }
+    }
+    
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+});
+</script>
+{{end}}

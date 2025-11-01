@@ -22,6 +22,10 @@ const (
 	vVACCSARGS
 	vENDVACCSARGS
 	vEXECUTABLE
+	vSTDIN
+	vSTARTINPUTFILES
+	vINPUTFILE
+	vENDINPUTFILES
 	vSUCCESS
 	vFAILURE_COMPILE
 	vFAILURE_ANALYZE
@@ -65,7 +69,7 @@ func (vc *VaccsComm) Close() {
 	vc.socket.Close()
 }
 
-func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, vargs []string, executableName string, params []string) ([]byte, error) {
+func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, inputfiles []string, inputSources []string, vargs []string, executableName string, params []string, stdinFilename string) ([]byte, error) {
 	vc.logger.Info(tagToString(vSTARTCFILES))
 	err := vc.send(vc.makeSTARTCFILES(uint32(len(filenames))))
 
@@ -104,6 +108,43 @@ func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, varg
 		return nil, err
 	}
 
+	vc.logger.Info(tagToString(vSTARTINPUTFILES))
+	err = vc.send(vc.makeSTARTINPUTFILES(uint32(len(inputfiles))))
+
+	if err != nil {
+		return nil, err
+	}
+
+	vc.logger.Info(tagToString(vACK))
+	err = vc.receive_ack()
+	if err != nil {
+		return nil, err
+	}
+
+	for i, filename := range inputfiles {
+		vc.logger.Info(tagToString(vINPUTFILE))
+		err = vc.send(vc.makeINPUTFILE(filename, inputSources[i]))
+		if err != nil {
+			return nil, err
+		}
+		vc.logger.Info(tagToString(vACK))
+		err = vc.receive_ack()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	vc.logger.Info(tagToString(vENDINPUTFILES))
+	err = vc.send(vc.makeENDINPUTFILES())
+	if err != nil {
+		return nil, err
+	}
+
+	vc.logger.Info(tagToString(vACK))
+	err = vc.receive_ack()
+	if err != nil {
+		return nil, err
+	}
 	vc.logger.Info(tagToString(vSTARTVACCSARGS))
 	err = vc.send(vc.makeSTARTVACCSARG(uint32(len(vargs))))
 	if err != nil {
@@ -145,6 +186,18 @@ func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, varg
 
 	vc.logger.Info(tagToString(vEXECUTABLE))
 	err = vc.send(vc.makeEXECUTABLE(executableName))
+	if err != nil {
+		return nil, err
+	}
+
+	vc.logger.Info(tagToString(vACK))
+	err = vc.receive_ack()
+	if err != nil {
+		return nil, err
+	}
+
+	vc.logger.Info(tagToString(vSTDIN))
+	err = vc.send(vc.makeSTDIN(stdinFilename))
 	if err != nil {
 		return nil, err
 	}
@@ -242,6 +295,14 @@ func tagToString(tag byte) string {
 		return "end sending analysis arguments"
 	case vEXECUTABLE:
 		return "send executable name"
+	case vSTDIN:
+		return "send stdin filename"
+	case vSTARTINPUTFILES:
+		return "start sending input files"
+	case vINPUTFILE:
+		return "send input file"
+	case vENDINPUTFILES:
+		return "end sending input files"
 	case vSUCCESS:
 		return "Success"
 	case vFAILURE_COMPILE:
@@ -376,6 +437,31 @@ func (vc *VaccsComm) makeENDCFILES() []byte {
 	return buf.Bytes()
 }
 
+func (vc *VaccsComm) makeSTARTINPUTFILES(numfiles uint32) []byte {
+	buf := new(bytes.Buffer)
+	buf.WriteByte(byte(vSTARTINPUTFILES))
+	writeUint(buf, numfiles)
+	return buf.Bytes()
+}
+
+func (vc *VaccsComm) makeINPUTFILE(filename string, source string) []byte {
+	buf := new(bytes.Buffer)
+	buf.WriteByte(byte(vINPUTFILE))
+	writeInt(buf, len(filename))
+	buf.WriteString(filename)
+
+	writeInt(buf, len(source))
+	buf.WriteString(source)
+
+	return buf.Bytes()
+}
+
+func (vc *VaccsComm) makeENDINPUTFILES() []byte {
+	buf := new(bytes.Buffer)
+	buf.WriteByte(byte(vENDINPUTFILES))
+	return buf.Bytes()
+}
+
 func (vc *VaccsComm) makeSTARTPARAMS(numparams uint32) []byte {
 	buf := new(bytes.Buffer)
 	buf.WriteByte(byte(vSTARTPARAMS))
@@ -429,5 +515,15 @@ func (vc *VaccsComm) makeEXECUTABLE(executable string) []byte {
 	buf.WriteByte(byte(vEXECUTABLE))
 	writeInt(buf, len(executable))
 	buf.WriteString(executable)
+	return buf.Bytes()
+}
+
+func (vc *VaccsComm) makeSTDIN(stdin string) []byte {
+	buf := new(bytes.Buffer)
+	buf.WriteByte(byte(vSTDIN))
+	writeInt(buf, len(stdin))
+	if len(stdin) > 0 {
+		buf.WriteString(stdin)
+	}
 	return buf.Bytes()
 }

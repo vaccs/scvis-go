@@ -1,0 +1,1060 @@
+[{
+		"VACCS_ARCH":	{
+			"event_num":	-1,
+			"arch_type":	1,
+			"heap_start":	93824992251904,
+			"heap_end":	140737488211960,
+			"stack_start":	140737488351232,
+			"stack_end":	140737488211968
+		}
+	}, {
+		"VACCS_CMD_LINE":	{
+			"event_num":	-1,
+			"cmd_line":	"./t7 01 "
+		}
+	}, {
+		"VACCS_BINARY":	{
+			"event_num":	-1,
+			"bin_file_name":	"./t7"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	1,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"//"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	2,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"//-- Illustrate layout of activation record, overflows (using argv[1])"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	3,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"//"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	4,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"//"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	5,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"#include <stdio.h>"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	6,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"#include <stdlib.h>"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	7,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"#include <string.h>"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	8,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	""
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	9,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"int simpleFunction(char *cpparm1){"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	10,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"   char  *lbuf1;"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	11,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	""
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	12,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"   lbuf1 = malloc(3);"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	13,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"   strcpy(lbuf1,cpparm1);"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	14,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"   return(0);"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	15,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"}"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	16,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"int main(int argc, char **argv){"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	17,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"  simpleFunction(argv[1]);"
+		}
+	}, {
+		"VACCS_CCODE":	{
+			"event_num":	-1,
+			"c_line_num":	18,
+			"c_start_pos":	0,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"c_src_line":	"}"
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	14,
+			"path":	"test7.c",
+			"error_message":	" Memory leak: lbuf1 [memleak]",
+			"severity":	" error",
+			"column_num":	4
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	13,
+			"path":	"test7.c",
+			"error_message":	" If memory allocation fails, then there is a possible null pointer dereference: lbuf1 [nullPointerOutOfMemory]",
+			"severity":	" warning",
+			"column_num":	11
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	12,
+			"path":	"test7.c",
+			"error_message":	" Assuming allocation function fails",
+			"severity":	" note",
+			"column_num":	18
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	12,
+			"path":	"test7.c",
+			"error_message":	" Assignment 'lbuf1=malloc(3)', assigned value is 0",
+			"severity":	" note",
+			"column_num":	18
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	13,
+			"path":	"test7.c",
+			"error_message":	" Null pointer dereference",
+			"severity":	" note",
+			"column_num":	11
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	13,
+			"path":	"test7.c",
+			"error_message":	" strcpy [rule]",
+			"severity":	" warning",
+			"column_num":	0
+		}
+	}, {
+		"VACCS_CPPCHECK":	{
+			"event_num":	-1,
+			"line_num":	12,
+			"path":	"test7.c",
+			"error_message":	" malloc [rule]",
+			"severity":	" warning",
+			"column_num":	0
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|Type|Address|Size|Section Name"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555554318|28|.interp"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555554338|48|.note.gnu.property"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555554368|36|.note.gnu.build-id"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x55555555438c|32|.note.ABI-tag"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x5555555543b0|36|.gnu.hash"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|16|0x5555555543d8|168|.dynsym"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|20|0x555555554480|143|.dynstr"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555554510|14|.gnu.version"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555554520|48|.gnu.version_r"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|2|0x555555554550|192|.rela.dyn"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|2|0x555555554610|24|.rela.plt"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x555555555000|27|.init"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x555555555020|32|.plt"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x555555555040|16|.plt.got"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x555555555050|16|.plt.sec"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x555555555060|320|.text"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|4|0x5555555551a0|13|.fini"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555556000|4|.rodata"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555556004|60|.eh_frame_hdr"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555556040|204|.eh_frame"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555557db8|8|.init_array"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555557dc0|8|.fini_array"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|6|0x555555557dc8|496|.dynamic"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|8|0x555555557fb8|72|.got"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|5|0x555555558000|16|.data"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|18|0x555555558010|8|.bss"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|43|.comment"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|48|.debug_aranges"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|306|.debug_info"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|171|.debug_abbrev"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|105|.debug_line"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|269|.debug_str"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|17|0x0|90|.debug_line_str"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|15|0x0|888|.symtab"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|19|0x0|492|.strtab"
+		}
+	}, {
+		"VACCS_SECTION":	{
+			"info":	"|21|0x0|362|.shstrtab"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235849,
+			"c_line_num":	9,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"nop edx, edi"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235853,
+			"c_line_num":	9,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"push rbp"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235854,
+			"c_line_num":	9,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rbp, rsp"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235857,
+			"c_line_num":	9,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"sub rsp, 0x20"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235861,
+			"c_line_num":	9,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov qword ptr [rbp-0x18], rdi"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235865,
+			"c_line_num":	12,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rdx, qword ptr [rbp-0x18]"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235869,
+			"c_line_num":	12,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"lea rax, ptr [rbp-0x3]"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235873,
+			"c_line_num":	12,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rsi, rdx"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235876,
+			"c_line_num":	12,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rdi, rax"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235879,
+			"c_line_num":	12,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"call 0x555555555050"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235884,
+			"c_line_num":	13,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov eax, 0x0"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235889,
+			"c_line_num":	14,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"leave "
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235890,
+			"c_line_num":	14,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"ret "
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235891,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"nop edx, edi"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235895,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"push rbp"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235896,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rbp, rsp"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235899,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"sub rsp, 0x10"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235903,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov dword ptr [rbp-0x4], edi"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235906,
+			"c_line_num":	15,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov qword ptr [rbp-0x10], rsi"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235910,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rax, qword ptr [rbp-0x10]"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235914,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"add rax, 0x8"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235918,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rax, qword ptr [rax]"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235921,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov rdi, rax"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235924,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"call 0x555555555149"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235929,
+			"c_line_num":	16,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"mov eax, 0x0"
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235934,
+			"c_line_num":	17,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"leave "
+		}
+	}, {
+		"VACCS_ASM":	{
+			"event_num":	-1,
+			"asm_instr_addr":	93824992235935,
+			"c_line_num":	17,
+			"asm_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.s",
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"asm_inst":	"ret "
+		}
+	}, {
+		"VACCS_FUNCTION_INV":	{
+			"event_num":	0,
+			"func_line_num":	0,
+			"c_func_file":	"__NOCSOURCE__",
+			"inv_line_num":	0,
+			"c_inv_file":	"__NOCSOURCE__",
+			"func_name":	"_start",
+			"address":	0
+		}
+	}, {
+		"VACCS_FUNCTION_INV":	{
+			"event_num":	3,
+			"func_line_num":	15,
+			"c_func_file":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"inv_line_num":	0,
+			"c_inv_file":	"",
+			"func_name":	"main",
+			"address":	140737488345704
+		}
+	}, {
+		"VACCS_RETURN_ADDR":	{
+			"event_num":	3,
+			"dynamic_link":	140737488345856,
+			"return_address":	140737018765770,
+			"c_func_name":	"main"
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	4,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"main",
+			"address":	140737488345852,
+			"type":	"int",
+			"name":	"argc",
+			"points_to":	"",
+			"value":	"-1962704150"
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	4,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"main",
+			"address":	140737488345840,
+			"type":	"<pointer>",
+			"name":	"argv",
+			"points_to":	"",
+			"value":	"0x7fffffffdb80"
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	4,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"main",
+			"address":	140737488345840,
+			"type":	"<pointer>",
+			"name":	"argv",
+			"points_to":	"\u0002",
+			"value":	"0x7fffffffdb80"
+		}
+	}, {
+		"VACCS_RETURN_ADDR":	{
+			"event_num":	4,
+			"dynamic_link":	140737488345952,
+			"return_address":	140737018765963,
+			"c_func_name":	"main"
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	5,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	5,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345696
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	6,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rbp",
+			"value":	140737488345696
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	7,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345680
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	8,
+			"c_line_num":	15,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rflags",
+			"value":	518
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	11,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	11,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rax",
+			"value":	140737488345992
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	12,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rax",
+			"value":	140737488346000
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	13,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rflags",
+			"value":	534
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	14,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rax",
+			"value":	140737488346851
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	15,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rdi",
+			"value":	140737488346851
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	17,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rip",
+			"value":	93824992235849
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	18,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345672
+		}
+	}, {
+		"VACCS_FUNCTION_INV":	{
+			"event_num":	19,
+			"func_line_num":	9,
+			"c_func_file":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"inv_line_num":	16,
+			"c_inv_file":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"func_name":	"simpleFunction",
+			"address":	140737488345672
+		}
+	}, {
+		"VACCS_RETURN_ADDR":	{
+			"event_num":	19,
+			"dynamic_link":	140737488345696,
+			"return_address":	93824992235929,
+			"c_func_name":	"simpleFunction"
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	20,
+			"c_line_num":	9,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	20,
+			"c_line_num":	9,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345664
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	21,
+			"c_line_num":	9,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rbp",
+			"value":	140737488345664
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	22,
+			"c_line_num":	9,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345632
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	23,
+			"c_line_num":	9,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rflags",
+			"value":	514
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	24,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"simpleFunction",
+			"address":	140737488345640,
+			"type":	"<pointer>",
+			"name":	"cpparm1",
+			"points_to":	"",
+			"value":	"0x7fffffffdee3"
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	24,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"simpleFunction",
+			"address":	140737488345661,
+			"type":	"<array>[2]",
+			"name":	"lbuf1",
+			"points_to":	"",
+			"value":	"<NULL>"
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	24,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"simpleFunction",
+			"address":	140737488345640,
+			"type":	"<pointer>",
+			"name":	"cpparm1",
+			"points_to":	"0",
+			"value":	"0x7fffffffdee3"
+		}
+	}, {
+		"VACCS_RETURN_ADDR":	{
+			"event_num":	24,
+			"dynamic_link":	140737488345696,
+			"return_address":	93824992235929,
+			"c_func_name":	"simpleFunction"
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	25,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	25,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rdx",
+			"value":	140737488346851
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	26,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rax",
+			"value":	140737488345661
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	27,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsi",
+			"value":	140737488346851
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	28,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rdi",
+			"value":	140737488345661
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	30,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rip",
+			"value":	93824992235600
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	31,
+			"c_line_num":	12,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345624
+		}
+	}, {
+		"VACCS_VAR_ACCESS":	{
+			"event_num":	32,
+			"c_line_num":	13,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"scope":	"simpleFunction",
+			"address":	140737488345661,
+			"type":	"<array>[2]",
+			"name":	"lbuf1",
+			"points_to":	"",
+			"value":	"01"
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	33,
+			"c_line_num":	13,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	33,
+			"c_line_num":	13,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"eax",
+			"value":	0
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	34,
+			"c_line_num":	14,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	34,
+			"c_line_num":	14,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rbp",
+			"value":	140737488345696
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	35,
+			"c_line_num":	14,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345672
+		}
+	}, {
+		"VACCS_RETURN":	{
+			"event_num":	36
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	38,
+			"c_line_num":	14,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rip",
+			"value":	93824992235929
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	39,
+			"c_line_num":	14,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345680
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	40,
+			"c_line_num":	16,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_LINE_CHANGE":	{
+			"event_num":	40,
+			"c_line_num":	17,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c"
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	40,
+			"c_line_num":	17,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rbp",
+			"value":	140737488345856
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	41,
+			"c_line_num":	17,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345704
+		}
+	}, {
+		"VACCS_RETURN":	{
+			"event_num":	42
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	44,
+			"c_line_num":	17,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rip",
+			"value":	140737018765770
+		}
+	}, {
+		"VACCS_REGISTER":	{
+			"event_num":	45,
+			"c_line_num":	17,
+			"c_file_name":	"/home/stevecarr/dynamic_analysis/pin/source/tools/PAS/tests/test7.c",
+			"register_name":	"rsp",
+			"value":	140737488345712
+		}
+	}, {
+		"VACCS_RETURN":	{
+			"event_num":	49
+		}
+	}]

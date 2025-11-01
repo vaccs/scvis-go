@@ -61,12 +61,19 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 		}
 	}
 
+	// Get CSP nonce from context
+	cspNonce := ""
+	if nonce, ok := r.Context().Value(cspNonceContextKey).(string); ok {
+		cspNonce = nonce
+	}
+
 	return templateData{
 		CurrentYear:     time.Now().Year(),
 		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
 		IsAuthenticated: isAuthenticated,
 		IsAdministrator: isAdministrator,
 		CSRFToken:       nosurf.Token(r),
+		CSPNonce:        cspNonce,
 	}
 }
 

@@ -1,0 +1,326 @@
+{{define "title"}}VACCS - Visualization and Analysis of C Code for Security{{end}}
+
+{{define "main"}}
+        <style>
+            /* Uses CSS variables so it can inherit the scheduler color scheme.
+                 Provide sensible fallbacks if variables aren't defined globally. */
+            :root {
+                --bg: var(--app-bg, #d4c4b0);
+                --surface: var(--app-surface, #e8dcc8);
+                --surface-2: var(--app-surface-2, #f0e8d8);
+                --border: var(--app-border, #b8a68f);
+                --text: var(--app-text, #3a2f23);
+                --muted: var(--app-muted, #6b5d4f);
+                --primary: var(--app-primary, #8b6f47);
+                --primary-600: var(--app-primary-600, #705935);
+                --accent: var(--app-accent, #9d7f53);
+            }
+
+            .single-container { margin-top: 0.5rem; }
+            .single-header h2 { margin: 0 0 .25rem 0; color: var(--text); }
+            .single-header p { margin: 0 0 1rem 0; color: var(--muted); }
+
+            .single-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                align-items: start;
+            }
+
+            .card {
+                background: linear-gradient(180deg, var(--surface), var(--surface-2));
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 1rem;
+                box-shadow: 0 1px 2px rgba(0,0,0,.2);
+            }
+
+            .card h3 { margin: 0 0 .75rem 0; color: var(--text); font-size: 1.05rem; }
+            .hint { color: var(--muted); font-size: .9rem; margin: .35rem 0 0; }
+            label { color: var(--text); display: block; margin-bottom: .35rem; }
+            label.dropzone { margin-bottom: 0; } /* Override for dropzone labels */
+            input[type="text"], select {
+                background: var(--surface-2);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: .6rem .7rem;
+                width: 100%;
+            }
+
+            .dropzone {
+                border: 2px dashed var(--border);
+                background: rgba(255,255,255,0.02);
+                border-radius: 12px;
+                padding: 1rem;
+                text-align: center;
+                cursor: pointer;
+                transition: border-color .2s ease, background .2s ease;
+            }
+            .dropzone:hover { border-color: var(--primary); background: rgba(56,189,248,0.05); }
+            .dropzone.dragover { border-color: var(--accent); background: rgba(34,211,238,0.08); }
+            .dropzone .title { color: var(--text); font-weight: 600; }
+            .dropzone .subtitle { color: var(--muted); font-size: .9rem; }
+
+            .file-list { margin-top: .5rem; }
+            .file-list .file-item {
+                display: flex;
+                align-items: center;
+                margin: .25rem 0;
+                padding: .4rem .6rem;
+                border-radius: 8px;
+                background: rgba(56,189,248,0.08);
+                border: 1px solid rgba(56,189,248,0.2);
+            }
+            .file-list .file-name {
+                flex: 1;
+                color: var(--text);
+                font-size: .9rem;
+            }
+            .file-list .remove-btn {
+                background: none;
+                border: none;
+                color: #ef4444;
+                cursor: pointer;
+                font-size: 1.1rem;
+                padding: 0 .25rem;
+                line-height: 1;
+                font-weight: bold;
+                transition: transform .1s ease;
+            }
+            .file-list .remove-btn:hover {
+                transform: scale(1.2);
+                color: #dc2626;
+            }
+
+            .actions { margin-top: 1rem; display: flex; gap: .75rem; }
+            .btn-primary {
+                background: linear-gradient(180deg, var(--primary), var(--primary-600));
+                color: #ffffff;
+                border: 1px solid var(--primary-600);
+                border-radius: 10px;
+                padding: .65rem 1rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .btn-primary:hover { filter: brightness(1.05); }
+
+            @media (max-width: 900px) {
+                .single-grid { grid-template-columns: 1fr; }
+            }
+        </style>
+
+        <div class="single-container">
+            <div class="single-header">
+                <h2>Visualization and Analysis of C Code for Security (VACCS)</h2>
+                <p>Upload C files and optional input files for immediate analysis. No account required.</p>
+            </div>
+        </div>
+    
+        <form action="/scvis/single/analyze" method="POST" enctype="multipart/form-data">
+        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                <div class="single-grid">
+                    <!-- Left: Files -->
+                    <section class="card">
+                        <h3>Files</h3>
+
+                        <label for="cfiles-input" class="dropzone" id="dz-cfiles" tabindex="0">
+                            <div class="title">Upload C Files (required)</div>
+                            <div class="subtitle">Click to choose .c files or drag & drop</div>
+                        </label>
+                        <input id="cfiles-input" type="file" name="upload-files" accept=".c" multiple required style="display:none">
+                        <div id="cfiles-list" class="file-list"></div>
+
+                        <div style="height: .75rem"></div>
+
+                        <label for="ifiles-input" class="dropzone" id="dz-ifiles" tabindex="0">
+                            <div class="title">Upload Input Files (optional)</div>
+                            <div class="subtitle">Any file type is supported</div>
+                        </label>
+                        <input id="ifiles-input" type="file" name="upload-input-files" multiple style="display:none">
+                        <div id="ifiles-list" class="file-list"></div>
+                        <p class="hint">Your files are used once for this analysis and stored only in a temporary folder.</p>
+                    </section>
+
+                    <!-- Right: Options -->
+                    <section class="card">
+                        <h3>Options</h3>
+
+                        <div>
+                            <label>Application Parameters (optional)</label>
+                            <input type="text" name="parameters" placeholder="" value="{{.Form.Parameters}}">
+                            <p class="hint">Command-line parameters for your application (e.g., -cgo, -esp, -scc)</p>
+                            {{with .Form.FieldErrors.parameters}}
+                                <label class='error'>{{.}}</label>
+                            {{end}}
+                        </div>
+
+                        <div style="margin-top:.75rem;">
+                            <label for="stdin-file">Stdin Input File (optional)</label>
+                            <select name="stdin-file" id="stdin-file">
+                                <option value="">None</option>
+                            </select>
+                            <p class="hint">Choose one uploaded input file to pipe to stdin.</p>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn-primary" type="submit">Analyze</button>
+                        </div>
+                    </section>
+                </div>
+    </form>
+
+    {{if .Flash}}
+        <div class='flash'>{{.Flash}}</div>
+    {{end}}
+
+        <script nonce="{{.CSPNonce}}">
+            // File upload handler v2 - Updated 2025-10-30 17:00
+            // Wait for DOM to be ready
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded, setting up file uploads v2');
+                
+                // Direct approach - attach listeners immediately to inputs
+                const cfilesInput = document.getElementById('cfiles-input');
+                const ifilesInput = document.getElementById('ifiles-input');
+                
+                if (cfilesInput) {
+                    console.log('Found cfiles input');
+                    cfilesInput.addEventListener('change', function() {
+                        console.log('C files changed:', this.files.length);
+                        updateFileList('cfiles-list', this.files, 'cfiles-input');
+                    });
+                } else {
+                    console.error('cfiles-input not found!');
+                }
+                
+                if (ifilesInput) {
+                    console.log('Found ifiles input');
+                    ifilesInput.addEventListener('change', function() {
+                        console.log('Input files changed:', this.files.length);
+                        updateFileList('ifiles-list', this.files, 'ifiles-input');
+                        populateStdin();
+                    });
+                } else {
+                    console.error('ifiles-input not found!');
+                }
+                
+                // Helpers
+                function updateFileList(containerId, files, inputId) {
+                    console.log('updateFileList called:', containerId, files.length, 'files');
+                    const el = document.getElementById(containerId);
+                    if (!el) {
+                        console.error('Could not find container:', containerId);
+                        return;
+                    }
+                    el.innerHTML = '';
+                    Array.from(files).forEach((f, index) => {
+                        console.log('Adding file to list:', f.name);
+                        const item = document.createElement('div');
+                        item.className = 'file-item';
+                        
+                        const name = document.createElement('span');
+                        name.className = 'file-name';
+                        name.textContent = f.name;
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-btn';
+                        removeBtn.innerHTML = '×';
+                        removeBtn.type = 'button';
+                        removeBtn.title = 'Remove file';
+                        removeBtn.onclick = (e) => {
+                            e.preventDefault();
+                            removeFile(inputId, index);
+                        };
+                        
+                        item.appendChild(name);
+                        item.appendChild(removeBtn);
+                        el.appendChild(item);
+                    });
+                }
+
+                function removeFile(inputId, indexToRemove) {
+                    const input = document.getElementById(inputId);
+                    const dt = new DataTransfer();
+                    Array.from(input.files).forEach((file, index) => {
+                        if (index !== indexToRemove) {
+                            dt.items.add(file);
+                        }
+                    });
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+
+                // Wire up drag-drop for dropzones (click is handled by label)
+                function setupDropzone(zoneId, inputId, acceptExt) {
+                    const zone = document.getElementById(zoneId);
+                    const input = document.getElementById(inputId);
+
+                    if (!zone || !input) {
+                        console.error('Could not find zone or input:', zoneId, inputId);
+                        return;
+                    }
+
+                    console.log('Setting up dropzone:', zoneId);
+
+                    // Keyboard accessibility
+                    zone.addEventListener('keydown', (e) => { 
+                        if (e.key === 'Enter' || e.key === ' ') { 
+                            e.preventDefault(); 
+                            input.click(); 
+                        }
+                    });
+
+                    // Drag and drop events
+                    ;['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        zone.classList.add('dragover'); 
+                    }));
+                    
+                    ;['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        zone.classList.remove('dragover'); 
+                    }));
+
+                    zone.addEventListener('drop', (e) => {
+                        const items = e.dataTransfer.files;
+                        if (!items || items.length === 0) return;
+                        
+                        if (acceptExt) {
+                            const filtered = Array.from(items).filter(f => f.name.toLowerCase().endsWith(acceptExt));
+                            if (filtered.length === 0) return;
+                            const dt = new DataTransfer();
+                            filtered.forEach(f => dt.items.add(f));
+                            input.files = dt.files;
+                        } else {
+                            const dt = new DataTransfer();
+                            Array.from(items).forEach(f => dt.items.add(f));
+                            input.files = dt.files;
+                        }
+                        // Trigger change event
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+
+                function populateStdin() {
+                    const stdinSelect = document.getElementById('stdin-file');
+                    const ifiles = document.getElementById('ifiles-input').files;
+                    stdinSelect.innerHTML = '<option value="">None</option>';
+                    Array.from(ifiles).forEach((file, index) => {
+                        const option = document.createElement('option');
+                        option.value = index;
+                        option.textContent = file.name;
+                        stdinSelect.appendChild(option);
+                    });
+                }
+
+                // Init - now runs after DOM is ready
+                console.log('Initializing dropzones');
+                setupDropzone('dz-cfiles', 'cfiles-input', '.c');
+                setupDropzone('dz-ifiles', 'ifiles-input');
+                console.log('Setup complete');
+            });
+        </script>
+{{end}}

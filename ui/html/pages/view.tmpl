@@ -1,0 +1,535 @@
+{{define "title"}}View Project{{end}}
+
+{{define "main"}}
+    {{if .IsAuthenticated}}
+        <style>
+            /* Uses CSS variables for consistent theming */
+            :root {
+                --bg: var(--app-bg, #d4c4b0);
+                --surface: var(--app-surface, #e8dcc8);
+                --surface-2: var(--app-surface-2, #f0e8d8);
+                --border: var(--app-border, #b8a68f);
+                --text: var(--app-text, #3a2f23);
+                --muted: var(--app-muted, #6b5d4f);
+                --primary: var(--app-primary, #8b6f47);
+                --primary-600: var(--app-primary-600, #705935);
+                --accent: var(--app-accent, #9d7f53);
+            }
+
+            .view-container { margin-top: 0.5rem; }
+            .view-header h2 { margin: 0 0 .25rem 0; color: var(--text); }
+            .view-header .project-title { 
+                color: var(--primary); 
+                font-weight: 700;
+                font-size: 1.2em;
+            }
+            .view-header p { margin: 0 0 1rem 0; color: var(--muted); }
+
+            .view-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+                align-items: start;
+            }
+
+            .card {
+                background: linear-gradient(180deg, var(--surface), var(--surface-2));
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 1rem;
+                box-shadow: 0 1px 2px rgba(0,0,0,.2);
+            }
+
+            .card h3 { margin: 0 0 .75rem 0; color: var(--text); font-size: 1.05rem; }
+            .hint { color: var(--muted); font-size: .9rem; margin: .35rem 0 0; }
+            label { color: var(--text); display: block; margin-bottom: .35rem; }
+            label.dropzone { margin-bottom: 0; }
+            input[type="text"], select {
+                background: var(--surface-2);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                padding: .6rem .7rem;
+                width: 100%;
+            }
+
+            .dropzone {
+                border: 2px dashed var(--border);
+                background: rgba(255,255,255,0.02);
+                border-radius: 12px;
+                padding: 1rem;
+                text-align: center;
+                cursor: pointer;
+                transition: border-color .2s ease, background .2s ease;
+            }
+            .dropzone:hover { border-color: var(--primary); background: rgba(56,189,248,0.05); }
+            .dropzone.dragover { border-color: var(--accent); background: rgba(34,211,238,0.08); }
+            .dropzone .title { color: var(--text); font-weight: 600; }
+            .dropzone .subtitle { color: var(--muted); font-size: .9rem; }
+
+            .file-list { margin-top: .5rem; }
+            .file-list .file-item {
+                display: flex;
+                align-items: center;
+                margin: .25rem 0;
+                padding: .4rem .6rem;
+                border-radius: 8px;
+                background: rgba(56,189,248,0.08);
+                border: 1px solid rgba(56,189,248,0.2);
+            }
+            .file-list .file-name {
+                flex: 1;
+                color: var(--text);
+                font-size: .9rem;
+            }
+            .file-list .file-name a {
+                color: var(--text);
+                text-decoration: none;
+            }
+            .file-list .file-name a:hover {
+                text-decoration: underline;
+            }
+            .file-list .delete-checkbox {
+                display: flex;
+                align-items: center;
+                gap: .25rem;
+                font-size: .85rem;
+                color: var(--muted);
+            }
+
+            .actions { margin-top: 1rem; display: flex; gap: .75rem; flex-wrap: wrap; }
+            .btn-primary {
+                background: linear-gradient(180deg, var(--primary), var(--primary-600));
+                color: #ffffff;
+                border: 1px solid var(--primary-600);
+                border-radius: 10px;
+                padding: .65rem 1rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .btn-primary:hover { filter: brightness(1.05); }
+            
+            .btn-secondary {
+                background: var(--surface-2);
+                color: var(--text);
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: .65rem 1rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
+            .btn-secondary:hover { 
+                background: var(--surface);
+                border-color: var(--primary);
+            }
+
+            .no-files {
+                padding: 2rem;
+                text-align: center;
+                color: var(--muted);
+                font-style: italic;
+            }
+
+            .upload-status {
+                margin-top: .5rem;
+                padding: .5rem;
+                border-radius: 8px;
+                font-size: .9rem;
+            }
+            .upload-status.success {
+                background: rgba(34, 197, 94, 0.1);
+                color: #16a34a;
+            }
+            .upload-status.error {
+                background: rgba(239, 68, 68, 0.1);
+                color: #dc2626;
+            }
+
+            .analysis-indicator {
+                display: inline-block;
+                margin-left: .5rem;
+                padding: .25rem .5rem;
+                background: rgba(34, 197, 94, 0.1);
+                border: 1px solid rgba(34, 197, 94, 0.3);
+                border-radius: 6px;
+                color: #16a34a;
+                font-size: .85rem;
+                font-weight: 600;
+            }
+
+            @media (max-width: 900px) {
+                .view-grid { grid-template-columns: 1fr; }
+            }
+        </style>
+
+        <div class="view-container">
+            <div class="view-header">
+                <h2>
+                    <span class="project-title">{{.Project.Title}}</span>
+                    {{if .Project.Analysis}}
+                        {{if ne (len .Project.Analysis) 2}}
+                            <span class="analysis-indicator">✓ Analyzed</span>
+                        {{end}}
+                    {{end}}
+                </h2>
+                <p>View your project files and manage analysis.</p>
+            </div>
+        </div>
+    
+        <form action="/scvis/project/view" method="POST" id="view-form">
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+            
+            <div class="view-grid">
+                <!-- Left: Existing Files -->
+                <section class="card">
+                    <h3>Project Files</h3>
+
+                    <div>
+                        <strong style="color: var(--text); display: block; margin-bottom: .5rem;">C Files</strong>
+                        <div id="cfiles-list">
+                            {{if .Project.CFiles}}
+                                <div class="file-list">
+                                    {{range .Project.CFiles}}
+                                        <div class="file-item" data-file-id="{{.ID}}">
+                                            <span class="file-name">
+                                                <a href='#' class="view-cfile-link" data-file-id="{{.ID}}">{{.Filename}}</a>
+                                            </span>
+                                            <label class="delete-checkbox">
+                                                <input type="checkbox" name="cfilesids" value="{{.ID}}">
+                                                Delete
+                                            </label>
+                                        </div>
+                                    {{end}}
+                                </div>
+                            {{else}}
+                                <div class="no-files">No C files yet. Add files using the panel on the right.</div>
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <div style="height: .75rem"></div>
+
+                    <div>
+                        <strong style="color: var(--text); display: block; margin-bottom: .5rem;">Input Files</strong>
+                        <div id="inputfiles-list">
+                            {{if .Project.InputFiles}}
+                                <div class="file-list">
+                                    {{range .Project.InputFiles}}
+                                        <div class="file-item" data-file-id="{{.ID}}">
+                                            <span class="file-name">
+                                                <a href='#' class="view-input-link" data-file-id="{{.ID}}">{{.Filename}}</a>
+                                            </span>
+                                            <label class="delete-checkbox">
+                                                <input type="checkbox" name="inputfilesids" value="{{.ID}}">
+                                                Delete
+                                            </label>
+                                        </div>
+                                    {{end}}
+                                </div>
+                            {{else}}
+                                <div class="no-files">No input files yet.</div>
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <p class="hint">Click on file names to view them. Check boxes to mark for deletion.</p>
+
+                    <div class="actions">
+                        {{if .Project.CFiles}}
+                            {{if .Project.Analysis}}
+                                {{if ne (len .Project.Analysis) 2}}
+                                    <button class="btn-primary" type="button" id="view-analysis-btn">View Analysis</button>
+                                {{end}}
+                            {{end}}
+                            <button class="btn-primary" type="button" id="analyze-btn">{{if .Project.Analysis}}{{if ne (len .Project.Analysis) 2}}Re-analyze{{else}}Analyze{{end}}{{else}}Analyze{{end}}</button>
+                        {{end}}
+                        <button class="btn-secondary" type="submit">Update Project</button>
+                        <button class="btn-secondary" type="button" onclick="window.location.href='/scvis/home'">Back to Projects</button>
+                    </div>
+                </section>
+
+                <!-- Right: Add Files -->
+                <section class="card">
+                    <h3>Add Files</h3>
+
+                    <div>
+                        <label>Project Title</label>
+                        <input type='text' name='title' value='{{.Project.Title}}'>
+                        <p class="hint">Update your project name if needed.</p>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label>Upload C Files</label>
+                        <label for="cfiles-input" class="dropzone" id="dz-cfiles" tabindex="0">
+                            <div class="title">Add C Files</div>
+                            <div class="subtitle">Click to choose .c files or drag & drop</div>
+                        </label>
+                        <input id="cfiles-input" type="file" accept=".c" multiple style="display:none">
+                        <div id="cfiles-upload-status"></div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label>Upload Input Files</label>
+                        <label for="ifiles-input" class="dropzone" id="dz-ifiles" tabindex="0">
+                            <div class="title">Add Input Files</div>
+                            <div class="subtitle">Any file type is supported</div>
+                        </label>
+                        <input id="ifiles-input" type="file" multiple style="display:none">
+                        <div id="ifiles-upload-status"></div>
+                    </div>
+
+                    <p class="hint">Files are uploaded immediately when selected. Click "Update Project" to save changes to title or delete files.</p>
+                </section>
+            </div>
+        </form>
+
+        {{if .Flash}}
+            <div class='flash'>{{.Flash}}</div>
+        {{end}}
+
+        <script nonce="{{.CSPNonce}}">
+            document.addEventListener('DOMContentLoaded', function() {
+                const csrfToken = '{{.CSRFToken}}';
+                const cfilesInput = document.getElementById('cfiles-input');
+                const ifilesInput = document.getElementById('ifiles-input');
+                
+                // Handle file viewing links
+                const cfileLinks = document.querySelectorAll('.view-cfile-link');
+                cfileLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        viewCFile(this.getAttribute('data-file-id'));
+                    });
+                });
+
+                const inputLinks = document.querySelectorAll('.view-input-link');
+                inputLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        viewInputFile(this.getAttribute('data-file-id'));
+                    });
+                });
+
+                // Handle analyze button
+                const analyzeBtn = document.getElementById('analyze-btn');
+                if (analyzeBtn) {
+                    analyzeBtn.addEventListener('click', function() {
+                        window.location.href = '/scvis/project/analyze';
+                    });
+                }
+
+                // Handle view analysis button
+                const viewAnalysisBtn = document.getElementById('view-analysis-btn');
+                if (viewAnalysisBtn) {
+                    viewAnalysisBtn.addEventListener('click', function() {
+                        window.location.href = '/scvis/project/visual';
+                    });
+                }
+                
+                // Handle C file uploads
+                if (cfilesInput) {
+                    cfilesInput.addEventListener('change', function() {
+                        uploadFiles(this.files, 'cfile', 'cfiles-upload-status', 'cfiles-list');
+                    });
+                }
+                
+                // Handle input file uploads
+                if (ifilesInput) {
+                    ifilesInput.addEventListener('change', function() {
+                        uploadFiles(this.files, 'inputfile', 'ifiles-upload-status', 'inputfiles-list');
+                    });
+                }
+                
+                async function uploadFiles(files, type, statusId, listId) {
+                    const statusEl = document.getElementById(statusId);
+                    const listEl = document.getElementById(listId);
+                    
+                    if (!files || files.length === 0) return;
+                    
+                    statusEl.innerHTML = '<div class="upload-status">Uploading...</div>';
+                    
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        
+                        try {
+                            const response = await fetch(`/scvis/project/upload-${type}`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-Token': csrfToken
+                                },
+                                body: formData
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error(`Upload failed: ${response.statusText}`);
+                            }
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                addFileToList(listEl, result.id, result.filename, type);
+                                statusEl.innerHTML = `<div class="upload-status success">✓ ${file.name} uploaded successfully</div>`;
+                            } else {
+                                statusEl.innerHTML = `<div class="upload-status error">✗ Failed to upload ${file.name}</div>`;
+                            }
+                        } catch (error) {
+                            statusEl.innerHTML = `<div class="upload-status error">✗ Error: ${error.message}</div>`;
+                        }
+                    }
+                    
+                    // Clear the input
+                    if (type === 'cfile') {
+                        cfilesInput.value = '';
+                    } else {
+                        ifilesInput.value = '';
+                    }
+                    
+                    // Clear status after 3 seconds
+                    setTimeout(() => {
+                        statusEl.innerHTML = '';
+                    }, 3000);
+                }
+                
+                function addFileToList(listEl, fileId, filename, type) {
+                    // Remove "no files" message if it exists
+                    const noFiles = listEl.querySelector('.no-files');
+                    if (noFiles) {
+                        noFiles.remove();
+                    }
+                    
+                    // Create or get file-list container
+                    let fileListContainer = listEl.querySelector('.file-list');
+                    if (!fileListContainer) {
+                        fileListContainer = document.createElement('div');
+                        fileListContainer.className = 'file-list';
+                        listEl.appendChild(fileListContainer);
+                    }
+                    
+                    // Create file item
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.setAttribute('data-file-id', fileId);
+                    
+                    const linkClass = type === 'cfile' ? 'view-cfile-link' : 'view-input-link';
+                    const inputName = type === 'cfile' ? 'cfilesids' : 'inputfilesids';
+                    
+                    item.innerHTML = `
+                        <span class="file-name">
+                            <a href="#" class="${linkClass}" data-file-id="${fileId}">${filename}</a>
+                        </span>
+                        <label class="delete-checkbox">
+                            <input type="checkbox" name="${inputName}" value="${fileId}">
+                            Delete
+                        </label>
+                    `;
+                    
+                    fileListContainer.appendChild(item);
+                    
+                    // Add click handler to new link
+                    const newLink = item.querySelector('a');
+                    newLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (type === 'cfile') {
+                            viewCFile(fileId);
+                        } else {
+                            viewInputFile(fileId);
+                        }
+                    });
+                }
+
+                function setupDropzone(zoneId, inputId, acceptExt) {
+                    const zone = document.getElementById(zoneId);
+                    const input = document.getElementById(inputId);
+                    if (!zone || !input) return;
+
+                    zone.addEventListener('keydown', (e) => { 
+                        if (e.key === 'Enter' || e.key === ' ') { 
+                            e.preventDefault(); 
+                            input.click(); 
+                        }
+                    });
+
+                    ;['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        zone.classList.add('dragover'); 
+                    }));
+                    
+                    ;['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        zone.classList.remove('dragover'); 
+                    }));
+
+                    zone.addEventListener('drop', (e) => {
+                        const items = e.dataTransfer.files;
+                        if (!items || items.length === 0) return;
+                        
+                        if (acceptExt) {
+                            const filtered = Array.from(items).filter(f => f.name.toLowerCase().endsWith(acceptExt));
+                            if (filtered.length === 0) return;
+                            const dt = new DataTransfer();
+                            filtered.forEach(f => dt.items.add(f));
+                            input.files = dt.files;
+                        } else {
+                            const dt = new DataTransfer();
+                            Array.from(items).forEach(f => dt.items.add(f));
+                            input.files = dt.files;
+                        }
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+
+                setupDropzone('dz-cfiles', 'cfiles-input', '.c');
+                setupDropzone('dz-ifiles', 'ifiles-input');
+            });
+            
+            // Helper functions to navigate using POST with session cookies
+            function viewCFile(id) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/scvis/cfile/set';
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = '{{.CSRFToken}}';
+                form.appendChild(csrfInput);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+            
+            function viewInputFile(id) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/scvis/input/set';
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = '{{.CSRFToken}}';
+                form.appendChild(csrfInput);
+                
+                const idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                form.appendChild(idInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+    {{else}}
+        <p>Please <a href="/scvis/user/login">log in</a> to view a project.</p>
+    {{end}}
+{{end}}

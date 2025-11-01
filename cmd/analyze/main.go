@@ -17,6 +17,8 @@ import (
 // Configuration structure for command line arguments
 type AnalysisConfig struct {
 	Files           []string // C files to analyze
+	InputFiles      []string // Input files for the C program
+	Stdin           string   // Read input files from stdin
 	VaccsArgs       []string // Arguments for the VACCS analyzer
 	ExecutableArgs  []string // Arguments for the C program execution
 	ExecutableName  string   // Name of the executable to create
@@ -72,6 +74,44 @@ func main() {
 		logger.Info("Loaded C file", "filename", filenames[i], "size", len(source))
 	}
 
+	// Read any provided input files (for program stdin or auxiliary inputs)
+	var inputFiles []string
+	var inputContents []string
+
+	// Helper to read a file or stdin
+	readSource := func(name string) (string, error) {
+		if name == "-" {
+			data, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				return "", err
+			}
+			return string(data), nil
+		}
+		if _, err := os.Stat(name); os.IsNotExist(err) {
+			return "", fmt.Errorf("input file does not exist: %s", name)
+		}
+		b, err := os.ReadFile(name)
+		if err != nil {
+			return "", err
+		}
+		return string(b), nil
+	}
+
+	// Read explicit input files listed in config.InputFiles
+	for _, inf := range config.InputFiles {
+		content, err := readSource(inf)
+		if err != nil {
+			log.Fatalf("Error reading input file %s: %v", inf, err)
+		}
+		inputFiles = append(inputFiles, filepath.Base(inf))
+		inputContents = append(inputContents, content)
+		logger.Info("Loaded input file", "source", inf, "size", len(content))
+	}
+
+	// Store back any normalized names (optional, useful for downstream use)
+	config.InputFiles = inputFiles
+	// If you need the actual contents later, you can use inputContents variable here or pass it to PerformAnalysis when available.
+
 	// Set default executable name if not provided
 	if config.ExecutableName == "" {
 		config.ExecutableName = "analysis_program"
@@ -93,7 +133,7 @@ func main() {
 	logger.Info("Connected to VACCS server")
 
 	// Perform analysis
-	result, err := vc.PerformAnalysis(filenames, sources, config.VaccsArgs, config.ExecutableName, config.ExecutableArgs)
+	result, err := vc.PerformAnalysis(filenames, sources, inputFiles, inputContents, config.VaccsArgs, config.ExecutableName, config.ExecutableArgs, config.Stdin)
 	if err != nil {
 		log.Fatalf("Analysis failed: %v", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"scvis.vaccsedu.org/internal/models"
@@ -11,15 +12,21 @@ import (
 )
 
 type templateData struct {
-	CurrentYear     int
-	Project         models.Project
-	Projects        []models.Project
-	Form            any
-	Flash           string
-	IsAuthenticated bool
-	IsAdministrator bool
-	CSRFToken       string
-	CFile           models.CFile
+	CurrentYear      int
+	Project          models.Project
+	Projects         []models.Project
+	Issue            *models.Issue
+	Issues           []*models.Issue
+	Form             any
+	Flash            string
+	IsAuthenticated  bool
+	IsAdministrator  bool
+	CSRFToken        string
+	CFile            models.CFile
+	InputFile        models.InputFile
+	GitHubConfigured bool
+	GitHubRepo       string
+	CSPNonce         string
 }
 
 func humanDate(t time.Time) string {
@@ -32,6 +39,7 @@ func humanDate(t time.Time) string {
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+	"split":     strings.Split,
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>strncpy Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="Steven M. Carr" >
+<meta name="date" content="2016-08-01T16:22:04-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, strncpy">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+
+<h1>strncpy()</h1>
+
+<p>The C library function <code>strncpy()</code> is often recommended as a more secure alternative to <code>strcpy()</code>. 
+<code>strncpy()</code> is similar to <code>strcpy()</code> except that it adds a parameter to indicate the maximum number of bytes
+that can be copied from <code><var>src</var></code> to <code><var>dest</var></code>. The prototype is</p>
+
+<p><code><b>char *strncpy</b>(</code>(char * <var>dst</var>, const char * <var>src</var>, size_t <var>len</var>)</p>
+
+<p>The variable <code><var>len</var></code> allows the programmer to prevent an unbounded copy. If <code><var>src</var></code>
+is less than <code><var>len</var></code> characters long, then <code>strncpy()</code> adds null characters to 
+<code><var>dest</var></code> to ensure that <code><var>len</var></code> bytes are written. If we consider the code below,</p>
+
+<p><pre>
+static char name[6];
+
+int main(int argc, char **argv) {
+  strncpy(name,"one",5);
+} </pre></p>
+
+<p>The call to <code>strncpy</code> will copy the string <code>"one"</code> and also store three null characters at the end of 
+<code>name</code>. The result of memory after the call to <code>strncpy()</code> is</p>
+
+<p><img src="images/jpeg/CstrncpyExamples1.jpeg" width="387" height="67" alt=""></p>
+
+<p>Specifying that a length of 4 ensures that the string copy is not unbounded.  </p>
+
+<p>While <code>strncpy()</code> may
+may prevent unbounded copy, it is vulnerable to string termination errors. Consider the following code: </p>
+
+<p><pre>
+static char name[4];
+
+int main(int argc, char **argv) {
+  strncpy(name,"bill",4);
+} </pre></p>
+
+<p>In this example the string <code>"bill"</code> is 4 characters long plus one null character. The call to <code>strnpcpy()</code>
+copies a maximum of 4 characters, leaving the variable <code>name</code> without a termination character as shown below.</p>
+
+<p><img src="images/jpeg/CstrncpyExamples2.jpeg" width="264" height="64" alt=""></p>
+
+<p> This is a runtime error since
+the string will have a random length depending on the next occurrence of a null character in memory.</p>
+</body>
+</html>

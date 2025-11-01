@@ -1,0 +1,101 @@
+<html>
+<head>
+<title>strcpy Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="Steven M. Carr" >
+<meta name="date" content="2016-08-01T16:43:16-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, strcpy">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+
+<h1>strcpy()</h1>
+
+<p>The C library function <code>strcpy()</code> copies a string (See <a href="assets/html/Help/strings.html">here</a> for a quick tutorial on C strings) from one memory location to another. It is considered <b>>insecure</b>. The prototype for <code>strcpy</code> is</p>
+
+<p><code><b>char *strcpy</b>(char *<var>dest</var>, char*<var> src</var>)</code></p>
+
+<p>The function <code>strcpy</code> copies the string that begins at the memory location pointed to by <code><var>src</var></code> to the
+memory location pointed to by <code><var>dest</var></code> up to and including the null termination character <code>'\0'</code>.</p>
+
+<p><code>strcpy()</code> is considered insecure and is vulnerable to a number of problems. Three of those problems are 
+unbounded string copy, buffer overflow and 
+null termination errors </p>
+
+<h3>Unbounded String Copy</h3>
+
+<p>Many string functions are vulnerable to copy errors because the functions do not allow the programmer to specify the length of the
+string to be copied. For example,  <code>strcpy()</code> is vulnerable to many errors because the length of the string copied from the 
+<code><var>src</var></code> to <code><var>dest</var></code>. Consider the
+following C code:</p>
+
+<pre>
+static char a[4];
+static char s[2];
+
+int main(int argc, char **argv) {
+
+  strcpy(s,"b");
+  strcpy(a,"bound");
+
+  printf("a = %s\n",a);
+  printf("s = %s\n",s);
+
+}
+
+ </pre></p>
+ 
+ <p>If this code is executed, the string <code>"bound"</code> will be 5 characters long plus one character for null. Since <code>a</code> is only allocated space for 4 characters,
+ the unbounded copy performed by <code>strcpy()</code> is a runtime error.</p> If we consider the space allocated for the variables
+ <code>a</code> and <code>s</code>, a compiler may allocate these variables continguously as below.
+ 
+ <p><img src="assets/images/CstrcpyUnboundExample1.png" width="387" height="176" alt=""></p>
+ 
+ <p>After the first call to <code>strcpy()</code>, the memory contains</p>
+ 
+ <p><img src="assets/images/CstrcpyUnboundExample2.png" width="390" height="173" alt=""></p>
+ 
+ <p>and then, finally, after the second call to <code>strcpy()</code>, memory contains</p>
+ 
+ <p><img src="assets/images/CstrcpyUnboundExample3.png" width="381" height="178" alt=""></p>
+ 
+ <p>Thus, the output of the two calls to <code>printf()</code> is</p>
+ 
+ <p><pre>
+ a = bound
+ s = d
+ </pre></p>
+ 
+ <h3>Null Termination</h3>
+
+<p><code><a href="assets/html/Help/strcpy.html">strcpy()</a></code> is also vulnerable to null termination errors. For example, in the code below, no space is allocated for the null termination
+character in the string <code>first</code>.</p>
+
+<p>
+<pre>
+static char first[5];
+static char last[5];
+
+int main(int argc, char **argv) {
+     
+        strcpy(first,"First");
+        strcpy(last,"Last");
+
+        printf("Name is: %s, %s\n",last,first);
+}
+
+ </pre></p>
+ 
+ <p>Depending on the compiler the second call to <code>strcpy()</code> may overwrite the null character ending the string 
+ <code>"First"</code>. The output could be</p>
+ 
+ <p><code>Name is: Last, FirstLast</code></p>
+ 
+</body>
+</html>
