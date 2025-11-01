@@ -1,0 +1,204 @@
+{{define "title"}}Issue #{{.Issue.ID}}{{end}}
+
+{{define "main"}}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h2>
+                        <span class="badge bg-secondary me-2">#{{.Issue.ID}}</span>
+                        {{.Issue.Title}}
+                    </h2>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <!-- Issue Type Badge -->
+                        {{if eq .Issue.IssueType "bug"}}
+                            <span class="badge bg-danger">🐛 Bug Report</span>
+                        {{else if eq .Issue.IssueType "feature"}}
+                            <span class="badge bg-info">✨ Feature Request</span>
+                        {{else if eq .Issue.IssueType "enhancement"}}
+                            <span class="badge bg-success">🚀 Enhancement</span>
+                        {{else if eq .Issue.IssueType "documentation"}}
+                            <span class="badge bg-warning text-dark">📚 Documentation</span>
+                        {{else if eq .Issue.IssueType "question"}}
+                            <span class="badge bg-secondary">❓ Question</span>
+                        {{end}}
+
+                        <!-- Priority Badge -->
+                        {{if eq .Issue.Priority "critical"}}
+                            <span class="badge bg-danger">🔴 Critical Priority</span>
+                        {{else if eq .Issue.Priority "high"}}
+                            <span class="badge bg-warning text-dark">🟠 High Priority</span>
+                        {{else if eq .Issue.Priority "medium"}}
+                            <span class="badge bg-info">🟡 Medium Priority</span>
+                        {{else if eq .Issue.Priority "low"}}
+                            <span class="badge bg-success">🟢 Low Priority</span>
+                        {{end}}
+
+                        <!-- Status Badge -->
+                        {{if eq .Issue.Status "pending"}}
+                            <span class="badge bg-secondary">⏳ Pending</span>
+                        {{else if eq .Issue.Status "submitted"}}
+                            <span class="badge bg-primary">📤 Submitted</span>
+                        {{else if eq .Issue.Status "acknowledged"}}
+                            <span class="badge bg-info">👀 Acknowledged</span>
+                        {{else if eq .Issue.Status "in_progress"}}
+                            <span class="badge bg-warning text-dark">⚙️ In Progress</span>
+                        {{else if eq .Issue.Status "resolved"}}
+                            <span class="badge bg-success">✅ Resolved</span>
+                        {{else if eq .Issue.Status "closed"}}
+                            <span class="badge bg-dark">🔒 Closed</span>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <a href="/scvis/issue/list" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Issues
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Issue Description -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-alt"></i> Description
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="issue-description">
+                                {{range (split .Issue.Description "\n")}}
+                                    <p>{{.}}</p>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GitHub Integration -->
+                    {{if .Issue.GitHubIssueNumber}}
+                    <div class="card mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fab fa-github"></i> GitHub Issue
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                This issue has been submitted to GitHub as issue 
+                                <strong>#{{.Issue.GitHubIssueNumber}}</strong>
+                            </p>
+                            <a href="{{.Issue.GitHubURL}}" target="_blank" class="btn btn-dark">
+                                <i class="fab fa-github"></i> View on GitHub
+                            </a>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Issue Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-info-circle"></i> Issue Details
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5">Submitted by:</dt>
+                                <dd class="col-sm-7">{{.Issue.Username}}</dd>
+                                
+                                <dt class="col-sm-5">Created:</dt>
+                                <dd class="col-sm-7">{{humanDate .Issue.Created}}</dd>
+                                
+                                <dt class="col-sm-5">Last updated:</dt>
+                                <dd class="col-sm-7">{{humanDate .Issue.Updated}}</dd>
+                                
+                                {{if .Issue.GitHubIssueNumber}}
+                                <dt class="col-sm-5">GitHub Issue:</dt>
+                                <dd class="col-sm-7">
+                                    <a href="{{.Issue.GitHubURL}}" target="_blank" class="text-decoration-none">
+                                        #{{.Issue.GitHubIssueNumber}}
+                                    </a>
+                                </dd>
+                                {{end}}
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- Status Management (Admin Only) -->
+                    {{if .IsAdministrator}}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cogs"></i> Administration
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form action="/scvis/issue/status/{{.Issue.ID}}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                                
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Update Status:</label>
+                                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                                        <option value="pending" {{if eq .Issue.Status "pending"}}selected{{end}}>⏳ Pending</option>
+                                        <option value="submitted" {{if eq .Issue.Status "submitted"}}selected{{end}}>📤 Submitted</option>
+                                        <option value="acknowledged" {{if eq .Issue.Status "acknowledged"}}selected{{end}}>👀 Acknowledged</option>
+                                        <option value="in_progress" {{if eq .Issue.Status "in_progress"}}selected{{end}}>⚙️ In Progress</option>
+                                        <option value="resolved" {{if eq .Issue.Status "resolved"}}selected{{end}}>✅ Resolved</option>
+                                        <option value="closed" {{if eq .Issue.Status "closed"}}selected{{end}}>🔒 Closed</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {{end}}
+
+                    <!-- Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tools"></i> Actions
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {{if .Issue.GitHubURL}}
+                                <a href="{{.Issue.GitHubURL}}" target="_blank" class="btn btn-dark btn-sm w-100 mb-2">
+                                    <i class="fab fa-github"></i> View on GitHub
+                                </a>
+                            {{end}}
+                            
+                            <a href="/scvis/issue/list" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-list"></i> All Issues
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.issue-description {
+    line-height: 1.6;
+}
+
+.issue-description p:last-child {
+    margin-bottom: 0;
+}
+
+.card-header h5, .card-header h6 {
+    margin: 0;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+</style>
+{{end}}

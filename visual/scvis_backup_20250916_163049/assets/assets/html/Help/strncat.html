@@ -1,0 +1,55 @@
+<html>
+<head>
+<title>strncat Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="Steven M. Carr" >
+<meta name="date" content="2016-08-01T16:40:21-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, strncpy">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+
+<h1>strncat()</h1>
+
+<p>The C library function <code>strncat()</code> is often recommended as a more secure alternative to <code>strcat()</code>. 
+<code>strncat()</code> is similar to <code>strcat()</code> except that it adds a parameter to indicate the maximum number of bytes
+that can be appended from <code><var>src</var></code> to <code><var>dest</var></code>. The prototype is</p>
+
+<p><code><b>char *strncat</b>(</code>(char * <var>dst</var>, const char * <var>src</var>, size_t <var>len</var>)</p>
+
+<p>The variable <code><var>len</var></code> allows the programmer to prevent an unbounded concatenate. The null termination 
+character at the end of <code><var>dest</var></code></var></code> is overwritten with the first character of <code><var>src</var>
+</code> and a null character is added to the end of the concantenated string. The maximum size of <code><var>dest</var></code></var></code>
+after the call to <code>strncat()</code> is the original length of <code><var>dest</var></code></var> + <var>len</var> + 1</code>.
+The programmer must still take great care to ensure the call to <code>strncat()</code> does not write past the end of the space allocated 
+for <code><var>dest</var></code></var></code>. Consider the following code: </p>
+
+<p><pre>
+static char buff[4];
+
+int main(int argc, char **argv) {
+	strncpy(buff,"a",1);
+	strncat(buff,"abc",3);
+}
+</pre></p>
+
+<p>After the call to <code>strncpy()</code> the memory for <code>buff</code> looks like </p>
+
+<p><img src="images/jpeg/CstrncatExample1.png" width="399" height="191" alt=""></p>
+
+<p>Since <code>strncat()</code> appends a null termination character at the end, the string in <code>buff</code> takes up 5
+characters instead of the 4 allocated in the variable declaration. Thus, the result is </p>
+
+<p><img src="images/jpeg/CstrncatExample2.jpeg" width="393" height="193" alt=""></p>
+
+<p>Even though <code>strncat</code> allows the programmer to specify
+the maximum number of characters to concatenate, it does not prevent mistakes, such as the one above, where the programmer forgets
+to account for the null termination character. Thus, extreme care must be taken to ensure that enough space is allocated.</p>
+</body>
+</html>

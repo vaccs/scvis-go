@@ -3,8 +3,11 @@
 {{define "main"}}
     {{if .IsAuthenticated}}
         <h2>Projects</h2>
+        <p style="color: #6b5d4f; font-style: italic; margin-bottom: 1rem;">Click on a project title to access the project.</p>
         {{if .Projects}}
-            <form>
+            <form method="POST" id="mainForm">
+                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                <input type='hidden' name='target' id='targetInput' value=''>
                 <table>
                     <tr>
                         <th>Title</th>
@@ -13,22 +16,75 @@
                     </tr>
                     {{range $index, $project := .Projects}}
                         <tr>
-                            <td><a href='/scvis/project/analyze?id={{$project.ID}}'>{{$project.Title}}</a></td>
+                            <td>
+                                <a href='#' data-project-id="{{$project.ID}}" class="project-link" style="color:#800020; text-decoration:none; cursor:pointer;">
+                                    {{$project.Title}}
+                                </a>
+                            </td>
                             <td>{{humanDate .Created}}</td>
                             <td>
-                                <input type="radio" name="id" value="{{$project.ID}}" {{if eq $index 0}}checked{{end}}>
+                                <input type="radio" name="selected_id" value="{{$project.ID}}" {{if eq $index 0}}checked{{end}}>
                             </td>
                         </tr>
                     {{end}}
                 </table>
                 <div>
                     <input type='submit' formaction="/scvis/project/create" formmethod="get" value='Create Project'>
-                    <input type='submit' formaction="/scvis/project/update" formmethod="get" value='Update Project'>
-                    <input type='submit' formaction="/scvis/project/analyze" formmethod="get" value='Analyze Project'>
-                    <input type='submit' formaction="/scvis/project/visual" formmethod="get" value='Visualize Project'>
-                    <input type='submit' formaction="/scvis/project/delete" formmethod="get" value='Delete Project(s)'>
+                    <button type='button' id='deleteBtn'>Delete Project(s)</button>
                 </div>
             </form>
+            
+            <script nonce="{{.CSPNonce}}">
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Handle project title clicks
+                    const projectLinks = document.querySelectorAll('.project-link');
+                    projectLinks.forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const projectId = this.getAttribute('data-project-id');
+                            setProjectAndGo(projectId, '/scvis/project/view');
+                        });
+                    });
+                    
+                    // Handle delete button
+                    const deleteBtn = document.getElementById('deleteBtn');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', function() {
+                            deleteSelectedProject();
+                        });
+                    }
+                });
+                
+                function setProjectAndGo(id, target) {
+                    const form = document.getElementById('mainForm');
+                    form.action = '/scvis/project/set';
+                    
+                    // Remove any existing id input
+                    const existingId = form.querySelector('input[name="id"]');
+                    if (existingId) existingId.remove();
+                    
+                    // Add new id input
+                    const idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.name = 'id';
+                    idInput.value = id;
+                    form.appendChild(idInput);
+                    
+                    // Set target
+                    document.getElementById('targetInput').value = target;
+                    
+                    form.submit();
+                }
+                
+                function deleteSelectedProject() {
+                    const selected = document.querySelector('input[name=selected_id]:checked');
+                    if (selected) {
+                        setProjectAndGo(selected.value, '/scvis/project/delete');
+                    } else {
+                        alert('Please select a project to delete');
+                    }
+                }
+            </script>
         {{else}}
             <p>There are no projects yet!</p>
             <form>

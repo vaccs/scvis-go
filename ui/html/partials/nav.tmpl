@@ -1,8 +1,13 @@
 {{define "nav"}}
 <nav>
     <div>
-        <a href='/scvis/'>Home</a>
         {{if .IsAuthenticated}}
+            <a href='/scvis/home'>My Projects</a>
+        {{else}}
+            <a href='/scvis/'>Home</a>
+        {{end}}
+        {{if .IsAuthenticated}}
+            <a href='/scvis/issue/list'>Issues</a>
             {{if .IsAdministrator}}
                 <a href='/scvis/user/signup'>Create User</a>
             {{end}}

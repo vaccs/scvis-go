@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"scvis.vaccsedu.org/internal/github"
 	"scvis.vaccsedu.org/internal/models"
 
 	"github.com/alexedwards/scs/mysqlstore"
@@ -26,7 +27,10 @@ type application struct {
 	logger         *slog.Logger
 	projects       models.ProjectModelInterface
 	cfiles         models.CFileModelInterface
+	inputfiles     models.InputFileModelInterface
 	users          models.UserModelInterface
+	issues         models.IssueModelInterface
+	githubClient   *github.GitHubClient
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
@@ -142,35 +146,29 @@ func (lr *LogRotator) Close() error {
 }
 
 func main() {
-	// Determine server mode from LOCAL_SERVER environment variable or fallback to file check
-	localServerEnv := os.Getenv("LOCAL_SERVER")
-	if localServerEnv != "" {
-		// Explicit configuration via environment variable
-		localServer = localServerEnv == "true"
-	} else {
-		// Fallback: Check if running in installation directory vs development directory
-		if _, err := os.Stat("./scvis-go"); err == nil {
-			// Development directory (contains scvis-go executable/source)
-			localServer = true
-		} else if _, err := os.Stat("/opt/scvisual/.env"); err == nil {
-			// Production installation directory
-			localServer = false
-		} else {
-			// Default to local server mode for backwards compatibility
-			localServer = true
-		}
-	}
-
+	// First, determine which .env file to load based on file system check
 	var envPath string
-	if localServer {
-		envPath = "./.env"
-	} else {
+	if _, err := os.Stat("/opt/scvisual/.env"); err == nil {
+		// Production installation directory
 		envPath = "/opt/scvisual/.env"
+	} else {
+		// Default to local .env file
+		envPath = "./.env"
 	}
 
 	err := godotenv.Load(envPath)
 	if err != nil {
 		log.Fatalf("Error loading environment file: %s", envPath)
+	}
+
+	// Now determine server mode from LOCAL_SERVER in the loaded .env file
+	localServerEnv := os.Getenv("LOCAL_SERVER")
+	if localServerEnv != "" {
+		// Explicit configuration via environment variable from .env file
+		localServer = localServerEnv == "true"
+	} else {
+		// Fallback: assume local server if using .env, production if using /opt/scvisual/.env
+		localServer = envPath == "./.env"
 	}
 
 	dbUser := os.Getenv("DB_USER")
@@ -249,11 +247,25 @@ func main() {
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.Secure = true
 
+	// Initialize GitHub client
+	githubOwner := os.Getenv("GITHUB_OWNER")
+	githubRepo := os.Getenv("GITHUB_REPO")
+	if githubOwner == "" {
+		githubOwner = "vaccs" // Default organization
+	}
+	if githubRepo == "" {
+		githubRepo = "scvis-go" // Default repository
+	}
+	githubClient := github.NewGitHubClient(githubOwner, githubRepo)
+
 	app := &application{
 		logger:         logger,
 		projects:       &models.ProjectModel{DB: db},
 		cfiles:         &models.CFileModel{DB: db},
+		inputfiles:     &models.InputFileModel{DB: db},
 		users:          &models.UserModel{DB: db},
+		issues:         &models.IssueModel{DB: db},
+		githubClient:   githubClient,
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
 		sessionManager: sessionManager,
@@ -275,7 +287,6 @@ func main() {
 	logger.Info("getting embedded build folder")
 
 	logger.Info("starting server", "addr", srv.Addr)
-	log.Println("Initializing application")
 
 	// Get SSL certificate paths from environment variables, with fallback logic
 	var certPath, keyPath string

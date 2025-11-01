@@ -2,15 +2,39 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 
 	"github.com/justinas/nosurf"
 )
 
+const cspNonceContextKey = "cspNonce"
+
+func generateNonce() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
 func commonHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self' https://www.gstatic.com 'unsafe-eval'; connect-src 'self' https://www.gstatic.com https://fonts.gstatic.com; img-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;")
+		// Generate a nonce for inline scripts
+		nonce, err := generateNonce()
+		if err != nil {
+			nonce = "" // Fallback, though this should rarely happen
+		}
+
+		// Store nonce in context for templates
+		ctx := context.WithValue(r.Context(), cspNonceContextKey, nonce)
+		r = r.WithContext(ctx)
+
+		// Set CSP with nonce
+		cspHeader := fmt.Sprintf("default-src 'self'; script-src 'self' https://www.gstatic.com 'unsafe-eval' 'nonce-%s'; connect-src 'self' https://www.gstatic.com https://fonts.gstatic.com; img-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;", nonce)
+		w.Header().Set("Content-Security-Policy", cspHeader)
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
@@ -91,7 +115,7 @@ func (app *application) requireAdministrator(next http.Handler) http.Handler {
 func (app *application) redirectIfAuthenticated(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.isAuthenticated(r) {
-			http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
+			http.Redirect(w, r, "/scvis/home", http.StatusSeeOther)
 			return
 		}
 

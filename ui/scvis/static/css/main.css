@@ -56,12 +56,12 @@ h2 {
 }
 
 a {
-    color: #62CB31;
+    color: #800020;
     text-decoration: none;
 }
 
 a:hover {
-    color: #4EB722;
+    color: #600018;
     text-decoration: underline;
 }
 
@@ -156,7 +156,7 @@ nav a.live:after {
 button.link {
     background: none;
     border: none;
-    color: #62CB31;
+    color: #8b6f47;
     padding: 0;
     font: inherit;
     cursor: pointer;
@@ -164,7 +164,7 @@ button.link {
 }
 
 button.link:hover {
-    background-color: #4EB722;
+    background-color: #705935;
     color: #FFFFFF;
     cursor: pointer;
     text-decoration: none;
@@ -172,7 +172,7 @@ button.link:hover {
 
 a.button,
 input[type="submit"] {
-    background-color: #62CB31;
+    background-color: #8b6f47;
     border-radius: 3px;
     color: #FFFFFF;
     padding: 18px 27px;
@@ -184,7 +184,7 @@ input[type="submit"] {
 
 a.button:hover,
 input[type="submit"]:hover {
-    background-color: #4EB722;
+    background-color: #705935;
     color: #FFFFFF;
     cursor: pointer;
     text-decoration: none;
@@ -258,7 +258,7 @@ textarea {
 }
 
 button {
-    background-color: #62CB31;
+    background-color: #8b6f47;
     border-radius: 3px;
     color: #FFFFFF;
     padding: 18px 27px;
@@ -269,7 +269,7 @@ button {
 }
 
 button:hover {
-    background-color: #4EB722;
+    background-color: #705935;
     color: #FFFFFF;
     cursor: pointer;
     text-decoration: none;

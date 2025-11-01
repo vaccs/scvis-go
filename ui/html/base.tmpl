@@ -9,21 +9,88 @@
         <link rel='stylesheet' href='/scvis/static/css/main.css' type='text/css'>
         <link rel='shortcut icon' href='/scvis/static/img/scvis_small.png' type='image/x-icon'>
         <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700'>
+        <style>
+            /* Layout: Top bar 10%, main 90% with scroll if needed */
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Top navigation bar styling - 10% of viewport */
+            header.topbar {
+                background: #6b4f3a; /* brown */
+                color: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.5rem 1rem;
+                height: 10vh;
+                flex-shrink: 0;
+            }
+            header.topbar .brand img {
+                height: 40px;
+                display: block;
+            }
+            header.topbar a { color: #ffffff; }
+            /* Ensure the embedded nav has no white box and flows inline */
+            header.topbar .nav-container nav,
+            header.topbar .nav-container nav div {
+                background: transparent !important;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            header.topbar nav a {
+                color: #ffffff;
+                text-decoration: none;
+                margin: 0 0.5rem;
+            }
+            header.topbar nav a:hover { text-decoration: underline; }
+            header.topbar nav form { 
+                display: inline; 
+                margin: 0; 
+            }
+            header.topbar nav button.link {
+                color: #ffffff;
+                background: transparent;
+                border: 0;
+                padding: 0;
+                cursor: pointer;
+                font: inherit;
+                text-decoration: underline;
+            }
+            
+            /* Main content area - 90% of viewport with scroll */
+            main { 
+                flex: 1;
+                overflow-y: auto;
+                overflow-x: hidden;
+                height: 90vh;
+                padding: 1rem;
+            }
+        </style>
     </head>
     <body>
-        <header>
-            <a href='/scvis/'> <img src='/scvis/static/img/scvis.png' alt='Secure C Visual'>
+        <header class='topbar'>
+            <a class='brand' href='/scvis/'><img src='/scvis/static/img/scvis.png' alt='Secure C Visual'></a>
+            <div class='nav-container'>
+                {{template "nav" .}}
+            </div>
         </header>
-        {{template "nav" .}}
         <main>
             {{with .Flash}}
                 <div class='flash'>{{.}}</div>
             {{end}}
             {{template "main" .}}
         </main>
-        <footer>
-            Adapted from <a href='https:/https://lets-go.alexedwards.net//'>Let's Go</a> in {{.CurrentYear}}
-        </footer>
         <script src='/scvis/static/js/main.js' type='text/javascript'></script>
     </body>
 </html>

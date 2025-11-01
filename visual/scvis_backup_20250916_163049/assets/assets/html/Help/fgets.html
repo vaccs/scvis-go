@@ -1,0 +1,52 @@
+<html>
+<html>
+<head>
+<title>fgets Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="Steven M. Carr" >
+<meta name="date" content="2016-08-02T10:00:44-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, fgets">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+<h1>fgets()</h1>
+
+<p>The C library function <code>fgets()</code> reads a string from <code>stdin</code> and copies it into a memory location. It is often
+suggested as a more secure version of <code><a href="gets.html">gets()</a></code>.The prototype for <code>fgets</code> is</p>
+
+<p><code><b>char *fgets</b>(char *<var>str</var> int <var>size</var>, FILE * <var>stream</var>))</code></p>
+
+<p>The function <code>fgets()</code> stores the string of at most <code><var>size</var></code> characters read from <code><var>stream</var></code>  at the memory location pointed to by 
+<code><var>str</var></code>,
+ including the null termination character <code>'\0'</code>. </p>
+ 
+ <p><code>fgets()</code>, unlike <code>gets()</code>, puts a bound on the length of the string read and copied. For example, the code </p>
+ 
+ <p><pre>
+ int main(int argc, char **argv) {
+   char name[5];
+   
+   printf("Enter name: ");
+   fgets(name,4,stdin);
+ }</pre></p>
+ 
+ <p>reads a string of at most 4 characters rom <code>stdin</code> into the memory location pointed to by <code>name</code>.
+ However, if the programmer specifies a size in <code>fgets()</code> of more than 4 characters, the string may not be null terminated.
+ For example, if the user enters the string "Bill", the memory allocated for 
+ <code>name</code> contain:</p>
+ 
+ <p><img src="images/jpeg/CfgetsExample1.jpeg" width="434" height="197" alt=""></p>
+ 
+ <p>However, if the user enters "James", memory contains </p>
+ 
+ <p><img src="images/jpeg/CfgetsExample2.jpeg" width="454" height="201" alt=""></p>
+ 
+ <p>and the null termination character is not stored.</p>
+</body>
+</html>

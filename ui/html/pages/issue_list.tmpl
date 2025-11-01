@@ -1,0 +1,175 @@
+{{define "title"}}Issues{{end}}
+
+{{define "main"}}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-exclamation-triangle"></i> Issues
+                    {{if .GitHubConfigured}}
+                        <small class="text-muted">
+                            <i class="fab fa-github"></i> GitHub Connected
+                        </small>
+                    {{end}}
+                </h2>
+                {{if .IsAdministrator}}
+                    <a href="/scvis/issue/create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Submit New Issue
+                    </a>
+                {{end}}
+            </div>
+
+            {{if not .Issues}}
+                <div class="text-center py-5">
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No issues found</h4>
+                    {{if .IsAdministrator}}
+                        <p class="text-muted mb-4">Submit your first issue to get started</p>
+                        <a href="/scvis/issue/create" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Submit Issue
+                        </a>
+                    {{end}}
+                </div>
+            {{else}}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                {{if .IsAdministrator}}
+                                    <th>Submitted By</th>
+                                {{end}}
+                                <th>Created</th>
+                                <th>GitHub</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Issues}}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">#{{.ID}}</span>
+                                </td>
+                                <td>
+                                    <a href="/scvis/issue/view/{{.ID}}" class="text-decoration-none">
+                                        {{.Title}}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{if eq .IssueType "bug"}}
+                                        <span class="badge bg-danger">🐛 Bug</span>
+                                    {{else if eq .IssueType "feature"}}
+                                        <span class="badge bg-info">✨ Feature</span>
+                                    {{else if eq .IssueType "enhancement"}}
+                                        <span class="badge bg-success">🚀 Enhancement</span>
+                                    {{else if eq .IssueType "documentation"}}
+                                        <span class="badge bg-warning text-dark">📚 Docs</span>
+                                    {{else if eq .IssueType "question"}}
+                                        <span class="badge bg-secondary">❓ Question</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    {{if eq .Priority "critical"}}
+                                        <span class="badge bg-danger">🔴 Critical</span>
+                                    {{else if eq .Priority "high"}}
+                                        <span class="badge bg-warning text-dark">🟠 High</span>
+                                    {{else if eq .Priority "medium"}}
+                                        <span class="badge bg-info">🟡 Medium</span>
+                                    {{else if eq .Priority "low"}}
+                                        <span class="badge bg-success">🟢 Low</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    {{if eq .Status "pending"}}
+                                        <span class="badge bg-secondary">⏳ Pending</span>
+                                    {{else if eq .Status "submitted"}}
+                                        <span class="badge bg-primary">📤 Submitted</span>
+                                    {{else if eq .Status "acknowledged"}}
+                                        <span class="badge bg-info">👀 Acknowledged</span>
+                                    {{else if eq .Status "in_progress"}}
+                                        <span class="badge bg-warning text-dark">⚙️ In Progress</span>
+                                    {{else if eq .Status "resolved"}}
+                                        <span class="badge bg-success">✅ Resolved</span>
+                                    {{else if eq .Status "closed"}}
+                                        <span class="badge bg-dark">🔒 Closed</span>
+                                    {{end}}
+                                </td>
+                                {{if $.IsAdministrator}}
+                                    <td>{{.Username}}</td>
+                                {{end}}
+                                <td>
+                                    <small class="text-muted">{{humanDate .Created}}</small>
+                                </td>
+                                <td>
+                                    {{if .GitHubIssueNumber}}
+                                        <a href="{{.GitHubURL}}" target="_blank" class="text-decoration-none">
+                                            <i class="fab fa-github"></i> #{{.GitHubIssueNumber}}
+                                        </a>
+                                    {{else}}
+                                        <span class="text-muted">-</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    <a href="/scvis/issue/view/{{.ID}}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Issue Statistics -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">Issue Statistics</h6>
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <div class="h4 text-primary">{{len .Issues}}</div>
+                                        <small class="text-muted">Total Issues</small>
+                                    </div>
+                                    <div class="col">
+                                        <div class="h4 text-success">
+                                            {{range .Issues}}{{if eq .Status "resolved"}}{{end}}{{end}}
+                                        </div>
+                                        <small class="text-muted">Resolved</small>
+                                    </div>
+                                    <div class="col">
+                                        <div class="h4 text-warning">
+                                            {{range .Issues}}{{if eq .Status "in_progress"}}{{end}}{{end}}
+                                        </div>
+                                        <small class="text-muted">In Progress</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{if .GitHubConfigured}}
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fab fa-github"></i> GitHub Integration
+                                </h6>
+                                <p class="card-text text-success">
+                                    <i class="fas fa-check-circle"></i>
+                                    Connected and ready to submit issues
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}
