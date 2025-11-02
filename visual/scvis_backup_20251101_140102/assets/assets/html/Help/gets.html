@@ -1,0 +1,45 @@
+<html>
+<html>
+<head>
+<title>gets Tutorial</title>
+<meta name="generator" content="Bluefish 2.2.8" >
+<meta name="author" content="Steven M. Carr" >
+<meta name="date" content="2016-08-01T16:44:50-0400" >
+<meta name="copyright" content="Western Michigan University">
+<meta name="keywords" content="C, strings, gets">
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+</head>
+<body>
+<h1>gets()</h1>
+
+<p>The C library function <code>gets()</code> reads a string from <code>stdin</code> and copies it into a memory location. The prototype for <code>gets</code> is</p>
+
+<p><code><b>char *gets</b>(char *<var>str</var>)</code></p>
+
+<p>The function <code>gets()</code> stores the string read from <code>stdin</code>  at the memory location pointed to by 
+<code><var>str</var></code>,
+ including the null termination character <code>'\0'</code>. </p>
+ 
+ <p><code>gets()</code> does not put a bound on the length of the string read and copied from <code>stdin</code>. Thus, an
+ unbounded string copy can overwrite unintended memory locations. For example, the code </p>
+ 
+ <p><pre>
+ int main(int argc, char **argv) {
+   char name[5];
+   
+   printf("Enter name: ");
+   gets(name);
+ }</pre></p>
+ 
+ <p>reads an arbitrary length string from <code>stdin</code> into the memory location pointed to by <code>name</code>. If that
+ strings is longer than 5 characters, including the null termination character, then memory outside of that allocation for <code>name</code>
+ will be inadvertantly overwritten. For example, if the user enters "steven", the memory will contain</p>
+ 
+ <p><img src="images/jpeg/CgetsExample.jpeg" width="524" height="211" alt=""></p>
+</body>
+</html>
