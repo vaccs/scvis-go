@@ -146,19 +146,21 @@ func (lr *LogRotator) Close() error {
 }
 
 func main() {
-	// First, determine which .env file to load based on file system check
+	// First, try to load /opt/scvisual/.env, fall back to local .env if that fails
 	var envPath string
-	if _, err := os.Stat("/opt/scvisual/.env"); err == nil {
-		// Production installation directory
-		envPath = "/opt/scvisual/.env"
-	} else {
-		// Default to local .env file
-		envPath = "./.env"
-	}
+	var err error
 
-	err := godotenv.Load(envPath)
+	// Try production path first
+	envPath = "/opt/scvisual/.env"
+	err = godotenv.Load(envPath)
+
 	if err != nil {
-		log.Fatalf("Error loading environment file: %s", envPath)
+		// Fall back to local .env file
+		envPath = "./.env"
+		err = godotenv.Load(envPath)
+		if err != nil {
+			log.Fatalf("Error loading environment file from both /opt/scvisual/.env and ./.env: %v", err)
+		}
 	}
 
 	// Now determine server mode from LOCAL_SERVER in the loaded .env file

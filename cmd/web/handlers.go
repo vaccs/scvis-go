@@ -252,15 +252,18 @@ func (app *application) projectCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	_, err = app.projects.Insert(form.Title, app.sessionManager.GetInt(r.Context(), "authenticatedUserID"))
+	projectID, err := app.projects.Insert(form.Title, app.sessionManager.GetInt(r.Context(), "authenticatedUserID"))
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
+	// Set the newly created project as the current project in the session
+	app.sessionManager.Put(r.Context(), "currentProjectID", projectID)
+
 	app.sessionManager.Put(r.Context(), "flash", "Project successfully created!")
 
-	http.Redirect(w, r, "/scvis/", http.StatusSeeOther)
+	http.Redirect(w, r, "/scvis/project/view", http.StatusSeeOther)
 }
 
 type userSignupForm struct {
