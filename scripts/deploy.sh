@@ -24,7 +24,7 @@ sudo chmod 750 /etc/scvisual
 # Copy configuration file if it exists
 if [ -f "./.env" ]; then
     sudo cp ./.env /opt/scvisual/
-    sudo chown root:www-data /opt/scvisual/.env
+    sudo chown www-data:www-data /opt/scvisual/.env
     sudo chmod 600 /opt/scvisual/.env
 fi
 
