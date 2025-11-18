@@ -117,11 +117,19 @@ func main() {
 		config.ExecutableName = "analysis_program"
 	}
 
+	// Set default VACCS arguments if not provided (matches web application defaults)
+	if len(config.VaccsArgs) == 0 {
+		config.VaccsArgs = []string{"-u", "-r", "-j"}
+		logger.Info("Using default VACCS arguments", "args", config.VaccsArgs)
+	}
+
 	logger.Info("Starting analysis",
 		"files", len(filenames),
-		"vaccs_args", len(config.VaccsArgs),
-		"exec_args", len(config.ExecutableArgs),
-		"executable", config.ExecutableName)
+		"input_files", len(inputFiles),
+		"vaccs_args", config.VaccsArgs,
+		"exec_args", config.ExecutableArgs,
+		"executable", config.ExecutableName,
+		"stdin", config.Stdin)
 
 	// Connect to VACCS server
 	err := vc.Connect()
@@ -155,9 +163,12 @@ func parseFlags() *AnalysisConfig {
 	// Define flags
 	var vaccsArgs string
 	var execArgs string
+	var inputFilesArg string
 
-	flag.StringVar(&vaccsArgs, "vaccs-args", "", "Comma-separated list of arguments for VACCS analyzer (e.g., \"-Wall,-O2\")")
+	flag.StringVar(&vaccsArgs, "vaccs-args", "", "Comma-separated list of arguments for VACCS analyzer (e.g., \"-u,-r,-j\")")
 	flag.StringVar(&execArgs, "exec-args", "", "Comma-separated list of arguments for C program execution (e.g., \"arg1,arg2,arg3\")")
+	flag.StringVar(&inputFilesArg, "input-files", "", "Comma-separated list of input files to provide to the program")
+	flag.StringVar(&config.Stdin, "stdin", "", "File to use as stdin for the program (or \"-\" to read from stdin)")
 	flag.StringVar(&config.ExecutableName, "executable", "", "Name of the executable to create (default: analysis_program)")
 	flag.StringVar(&config.OutputFile, "output", "", "Output file for analysis results (default: stdout)")
 	flag.StringVar(&config.OutputFormat, "format", "pretty", "Output format: json, pretty, summary")
@@ -171,7 +182,9 @@ func parseFlags() *AnalysisConfig {
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
 		fmt.Fprintf(os.Stderr, "  %s program.c\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "  %s -vaccs-args=\"-Wall,-O2\" -exec-args=\"10,20\" program.c\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -vaccs-args=\"-u,-r,-j\" -exec-args=\"10,20\" program.c\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -input-files=\"data.txt,config.ini\" -exec-args=\"arg1\" program.c\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -stdin=\"input.txt\" -exec-args=\"12,AAAAAAAAAAAA\" program.c\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s -format=json -output=results.json program.c library.c\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "  %s -check\n", os.Args[0])
 	}
@@ -195,6 +208,14 @@ func parseFlags() *AnalysisConfig {
 		// Trim whitespace from each argument
 		for i, arg := range config.ExecutableArgs {
 			config.ExecutableArgs[i] = strings.TrimSpace(arg)
+		}
+	}
+
+	if inputFilesArg != "" {
+		config.InputFiles = strings.Split(inputFilesArg, ",")
+		// Trim whitespace from each filename
+		for i, filename := range config.InputFiles {
+			config.InputFiles[i] = strings.TrimSpace(filename)
 		}
 	}
 
