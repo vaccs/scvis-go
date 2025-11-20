@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
     
+    
 
         {
             "name": "Launch Package",
@@ -13,6 +14,15 @@
             "mode": "auto",
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/cmd/web"
-       }
+       },
+       {
+           "name": "Command line",
+           "type": "go",
+           "request": "launch",
+           "mode": "auto",
+           "cwd": "${workspaceFolder}",
+           "args": ["-exec-args=12,AAAAAAAAAAAA","input/overflow0.c"],
+           "program": "${workspaceFolder}/cmd/analyze/main.go"
+       },
     ]
 }

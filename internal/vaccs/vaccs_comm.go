@@ -70,6 +70,14 @@ func (vc *VaccsComm) Close() {
 }
 
 func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, inputfiles []string, inputSources []string, vargs []string, executableName string, params []string, stdinFilename string) ([]byte, error) {
+	vc.logger.Info("PerformAnalysis called",
+		"numCFiles", len(filenames),
+		"numInputFiles", len(inputfiles),
+		"numVaccsArgs", len(vargs),
+		"executableName", executableName,
+		"numParams", len(params),
+		"stdinFilename", stdinFilename)
+
 	vc.logger.Info(tagToString(vSTARTCFILES))
 	err := vc.send(vc.makeSTARTCFILES(uint32(len(filenames))))
 
@@ -185,6 +193,7 @@ func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, inpu
 	}
 
 	vc.logger.Info(tagToString(vEXECUTABLE))
+	vc.logger.Info("Sending executable name: " + executableName)
 	err = vc.send(vc.makeEXECUTABLE(executableName))
 	if err != nil {
 		return nil, err
@@ -197,6 +206,7 @@ func (vc *VaccsComm) PerformAnalysis(filenames []string, cSources []string, inpu
 	}
 
 	vc.logger.Info(tagToString(vSTDIN))
+	vc.logger.Info("Sending stdin filename: " + stdinFilename)
 	err = vc.send(vc.makeSTDIN(stdinFilename))
 	if err != nil {
 		return nil, err
