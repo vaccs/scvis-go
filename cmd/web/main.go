@@ -159,7 +159,9 @@ func main() {
 		envPath = "./.env"
 		err = godotenv.Load(envPath)
 		if err != nil {
-			log.Fatalf("Error loading environment file from both /opt/scvisual/.env and ./.env: %v", err)
+			// Hosted deployments (e.g. Railway) supply settings as environment variables
+			log.Printf("No .env file found in /opt/scvisual or ./, using environment variables")
+			envPath = ""
 		}
 	}
 
@@ -176,8 +178,22 @@ func main() {
 	dbUser := os.Getenv("DB_USER")
 	dbPasswd := os.Getenv("DB_PASSWD")
 	dbName := os.Getenv("DB_NAME")
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "3306"
+	}
 
-	dsn := fmt.Sprintf("%s:%s@/%s?parseTime=true", dbUser, dbPasswd, dbName)
+	if os.Getenv("DB_CREATE_DATABASE") == "true" {
+		if err := ensureDatabase(dbUser, dbPasswd, dbHost, dbPort, dbName); err != nil {
+			log.Fatalf("Failed to create database %q: %v", dbName, err)
+		}
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", dbUser, dbPasswd, dbHost, dbPort, dbName)
 	addr := fmt.Sprintf(":%s", os.Getenv("PORT"))
 
 	// Get log directory from environment variable, with fallback logic
@@ -220,14 +236,20 @@ func main() {
 		maxSizeMB = 1 // 1MB for local development if not explicitly set
 	}
 
-	// Create log rotator
-	logRotator, err := NewLogRotator(logPath, int64(maxSizeMB)*1024*1024, maxBackups)
-	if err != nil {
-		log.Fatalf("Failed to create log rotator: %v", err)
-	}
-	defer logRotator.Close()
+	// LOG_DIR=stdout sends logs to the console (hosted platforms collect stdout)
+	var logger *slog.Logger
+	if logDir == "stdout" {
+		logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+	} else {
+		// Create log rotator
+		logRotator, err := NewLogRotator(logPath, int64(maxSizeMB)*1024*1024, maxBackups)
+		if err != nil {
+			log.Fatalf("Failed to create log rotator: %v", err)
+		}
+		defer logRotator.Close()
 
-	logger := slog.New(slog.NewTextHandler(logRotator, nil))
+		logger = slog.New(slog.NewTextHandler(logRotator, nil))
+	}
 
 	db, err := openDB(dsn)
 	if err != nil {
@@ -235,6 +257,16 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
+	if err := ensureSchema(db); err != nil {
+		logger.Error("failed to create schema", "error", err)
+		os.Exit(1)
+	}
+	users := &models.UserModel{DB: db}
+	if err := seedAdmin(db, users, logger); err != nil {
+		logger.Error("failed to create initial admin user", "error", err)
+		os.Exit(1)
+	}
 
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -265,7 +297,7 @@ func main() {
 		projects:       &models.ProjectModel{DB: db},
 		cfiles:         &models.CFileModel{DB: db},
 		inputfiles:     &models.InputFileModel{DB: db},
-		users:          &models.UserModel{DB: db},
+		users:          users,
 		issues:         &models.IssueModel{DB: db},
 		githubClient:   githubClient,
 		templateCache:  templateCache,
@@ -289,6 +321,17 @@ func main() {
 	logger.Info("getting embedded build folder")
 
 	logger.Info("starting server", "addr", srv.Addr)
+
+	// SERVER_PROTOCOL=http serves plain HTTP for platforms that terminate TLS
+	// at their own proxy (e.g. Railway)
+	if os.Getenv("SERVER_PROTOCOL") == "http" {
+		logger.Info("serving plain HTTP")
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Error(err.Error())
+			os.Exit(1)
+		}
+		return
+	}
 
 	// Get SSL certificate paths from environment variables, with fallback logic
 	var certPath, keyPath string

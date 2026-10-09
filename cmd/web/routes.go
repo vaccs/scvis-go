@@ -11,6 +11,11 @@ import (
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	})
+	mux.Handle("GET /{$}", http.RedirectHandler("/scvis/", http.StatusFound))
+
 	mux.Handle("/scvis/visual/", http.StripPrefix("/scvis/visual/", http.FileServer(http.Dir("./visual/scvis"))))
 	// mux.Handle("GET /scvis/visual/", http.FileServerFS(visual.Files))
 	mux.Handle("GET /scvis/static/", http.FileServerFS(ui.Files))

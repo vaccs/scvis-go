@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"os"
 	"strconv"
 	"time"
 )
@@ -34,6 +35,14 @@ const (
 	vFAILURE_SYSTEM
 )
 
+// vaccsAddr returns the analysis server address (VACCS_ADDR, default localhost:3580)
+func vaccsAddr() string {
+	if addr := os.Getenv("VACCS_ADDR"); addr != "" {
+		return addr
+	}
+	return "localhost:3580"
+}
+
 type VaccsComm struct {
 	socket net.Conn
 	logger *slog.Logger
@@ -47,8 +56,8 @@ func NewVaccsComm(logger *slog.Logger) *VaccsComm {
 
 func (vc *VaccsComm) Connect() error {
 	var err error
-	vc.logger.Info("Connecting to localhost:3580")
-	vc.socket, err = net.DialTimeout("tcp", "localhost:3580", 10*time.Second)
+	vc.logger.Info("Connecting to " + vaccsAddr())
+	vc.socket, err = net.DialTimeout("tcp", vaccsAddr(), 10*time.Second)
 	if err != nil {
 		return err
 	}
@@ -57,7 +66,7 @@ func (vc *VaccsComm) Connect() error {
 }
 
 func (vc *VaccsComm) IsPortOpen() bool {
-	conn, err := net.DialTimeout("tcp", "localhost:3580", 2*time.Second)
+	conn, err := net.DialTimeout("tcp", vaccsAddr(), 2*time.Second)
 	if err != nil {
 		return false
 	}

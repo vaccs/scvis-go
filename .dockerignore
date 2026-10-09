@@ -1,0 +1,15 @@
+.git
+.vscode
+.env
+.env.*
+!.env.example
+production.env
+log
+tls
+scripts
+guides
+input
+web
+visual/scvis_backup_*
+*.md
+scvisual
